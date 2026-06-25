@@ -68,7 +68,6 @@
           <span class="cc-pill">预警闭环率：<b>100%</b></span>
           <button class="cc-btn yellow" id="btnMode">模式切换</button>
           <button class="cc-btn" id="btnLow">低负载模式</button>
-          <button class="cc-btn" data-go="deploy">部署到网址</button>
         </span>
       </div>
       <div class="cc-green">

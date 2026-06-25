@@ -5,6 +5,9 @@ backend/ai-config.json
 backend/data/
 backend/node_modules/
 node_modules/
+.server.pid
+.tunnel.pid
+tools/
 
 # 开发工具
 .claude/

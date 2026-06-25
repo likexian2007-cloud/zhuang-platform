@@ -1,4 +1,4 @@
-/* ====================== 模块：施工流程 / 创新成果 / 一码溯源 / 部署 ====================== */
+/* ====================== 模块：施工流程 / 创新成果 / AI作业票 / 一码溯源 ====================== */
 (function () {
   // 注入静态模块所需样式（一次）
   if (!document.getElementById("staticStyle")) {
@@ -18,6 +18,9 @@
     .timeline .ev{display:flex;gap:14px;padding-bottom:16px;position:relative}.timeline .ev::before{content:"";position:absolute;left:16px;top:34px;bottom:-2px;width:2px;background:var(--line)}.timeline .ev:last-child::before{display:none}.timeline .ev .dotc{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:14px;z-index:1}
     .trace-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.trace-photos img{width:92px;height:92px;object-fit:cover;border-radius:8px;border:1px solid var(--line-strong);background:#06101f}
     .idcard{display:flex;gap:18px;flex-wrap:wrap;align-items:center}.idcard .qr{background:#0b1220;padding:10px;border-radius:12px;border:1px solid var(--line)}
+    .ticket-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-dim)}.ticket-form input,.ticket-form select{width:100%}
+    .ticket-meter{height:10px;border-radius:999px;background:#07101f;border:1px solid var(--line);overflow:hidden}.ticket-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:width .25s ease}
+    .risk-list{display:grid;gap:8px}.risk-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(15,23,42,.58)}.risk-item i{margin-top:2px}.risk-item.bad i{color:#fca5a5}.risk-item.good i{color:#6ee7b7}.ticket-card{border-left:3px solid var(--cyan)}
     code,pre{font-family:Consolas,Menlo,monospace}pre{background:#05070f;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;font-size:13px;color:#9fe9ff}`;
     document.head.appendChild(s);
   }
@@ -81,6 +84,152 @@
     </div>
     <div class="card glow" style="text-align:center;padding:30px"><div class="section-title" style="justify-content:center;font-size:18px"><span class="i"></span>展望未来</div><p style="max-width:760px;margin:6px auto;color:var(--text-dim);line-height:1.9">推动“智慧建房”如搭积木般简单普惠，让乡村施工队伍易学易用；为每栋农房建立全生命周期“数字档案”，通过一码溯源实现长效智能运维。<br><b style="color:#9fe9ff">用创新筑巢，为乡亲圆梦，为建设宜居宜业和美乡村贡献新时代青春力量！</b></p></div>`;
   }});
+
+  /* ---------------- AI 作业票 ---------------- */
+  M.push({ id: "zuoyepiao", label: "AI作业票", icon: "fa-wpforms",
+    render(el) {
+      el.innerHTML = `
+      <h2 class="section-title"><span class="i"></span>AI 作业票 · 三确认一复核两到位</h2>
+      <p class="muted" style="margin:0 0 18px">对照稿子中的吊装关键控制点，把“未达标准，坚决不试吊；作业超限，立停、报告、复核后再启动”做成可执行判定。DeepSeek 在线时会生成专业整改闭环建议，离线时按本地规则兜底。</p>
+      <div class="grid g3" style="margin-bottom:18px">
+        <div class="card glow"><div class="section-title" style="font-size:15px"><span class="i"></span>准吊指数</div><div class="num-big" id="ticketScore">--%</div><div class="ticket-meter"><i id="ticketBar"></i></div><p class="muted" id="ticketScoreText" style="font-size:13px;margin:10px 0 0">等待现场数据复核</p></div>
+        <div class="card"><div class="section-title" style="font-size:15px"><span class="i"></span>控制口令</div><p id="ticketCommand" style="font-size:20px;font-weight:900;margin:0;color:#9fe9ff">先复核，再试吊</p><p class="muted" style="font-size:13px;margin:10px 0 0">自动输出“准许试吊”或“立停-报告-复核-整改”。</p></div>
+        <div class="card"><div class="section-title" style="font-size:15px"><span class="i"></span>AI 状态</div><span id="ticketAiBadge" class="badge amber">检测中...</span><p class="muted" style="font-size:13px;margin:10px 0 0">Key 只在后端保存，前端只调用代理接口。</p></div>
+      </div>
+      <div class="cols2">
+        <div class="card">
+          <div class="section-title" style="font-size:16px"><span class="i"></span>现场复核录入</div>
+          <div class="grid g3 ticket-form">
+            <label>风速 m/s<input id="tkWind" type="number" step="0.1" value="4.2"></label>
+            <label>温度 ℃<input id="tkTemp" type="number" step="0.1" value="22"></label>
+            <label>吊具夹角 °<input id="tkAngle" type="number" step="1" value="58"></label>
+            <label>试吊高度 mm<input id="tkTrialHeight" type="number" step="1" value="300"></label>
+            <label>停顿秒数<input id="tkPause" type="number" step="0.5" value="3"></label>
+            <label>安全距离倍数<input id="tkDistance" type="number" step="0.1" value="1.6"></label>
+            <label>凿毛深度 mm<input id="tkRoughDepth" type="number" step="0.1" value="3.2"></label>
+            <label>凿毛面积 %<input id="tkRoughArea" type="number" step="1" value="86"></label>
+            <label>垫片距边线 mm<input id="tkGasket" type="number" step="1" value="45"></label>
+            <label>构件编号<input id="tkCid" value="WQ-3F-A5-01"></label>
+            <label>施工轴线<input id="tkGrid" value="3号房 a轴/2轴"></label>
+            <label>责任班组<input id="tkTeam" value="装配一组"></label>
+          </div>
+          <div class="grid g2 ticket-form" style="margin-top:14px">
+            <label>套筒通透<select id="tkSleeve"><option value="1">已全数通透</option><option value="0">存在未通透</option></select></label>
+            <label>构件合格<select id="tkComponent"><option value="1">外观/尺寸合格</option><option value="0">构件待整改</option></select></label>
+            <label>设备完好<select id="tkDevice"><option value="1">吊具设备完好</option><option value="0">设备异常</option></select></label>
+            <label>安全交底<select id="tkBrief"><option value="1">已交底到位</option><option value="0">未交底</option></select></label>
+            <label>责任分工<select id="tkDuty"><option value="1">已分工到人</option><option value="0">未分工</option></select></label>
+            <label>方案复核<select id="tkPlan"><option value="1">已复核方案</option><option value="0">未复核</option></select></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button id="btnTicketRun" class="btn btn-cyan"><i class="fa fa-magic"></i> 生成AI作业票</button>
+            <button id="btnTicketFix" class="btn btn-primary"><i class="fa fa-wrench"></i> 一键整改闭环</button>
+            <button id="btnTicketClear" class="btn btn-ghost"><i class="fa fa-trash-o"></i> 清空历史</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="font-size:16px"><span class="i"></span>判定与AI建议</div>
+          <div id="ticketRisk" class="risk-list"></div>
+          <div id="ticketReport" class="card ticket-card" style="margin-top:14px;background:rgba(6,16,31,.72)"><span class="mute2">点击生成后显示作业票和整改建议。</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div class="section-title" style="font-size:16px;margin:0"><span class="i"></span>作业票历史</div><span class="badge cyan" id="ticketCount">0 条</span></div>
+        <div id="ticketHistory" style="margin-top:12px"></div>
+      </div>`;
+      this.setup(el);
+    },
+    onShow(el) { if (this._refresh) this._refresh(); },
+    setup(root) {
+      const { toast, now, AI } = window.Platform;
+      const q = (id) => root.querySelector("#" + id);
+      const key = "zhuang_work_tickets_v1";
+      const fields = ["tkWind", "tkTemp", "tkAngle", "tkTrialHeight", "tkPause", "tkDistance", "tkRoughDepth", "tkRoughArea", "tkGasket", "tkCid", "tkGrid", "tkTeam", "tkSleeve", "tkComponent", "tkDevice", "tkBrief", "tkDuty", "tkPlan"];
+      const num = (id) => Number(q(id).value || 0);
+      const yes = (id) => q(id).value === "1";
+      function load() { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } }
+      function save(list) { localStorage.setItem(key, JSON.stringify(list.slice(0, 30))); }
+      function readData() {
+        return {
+          cid: q("tkCid").value.trim() || "未填写",
+          grid: q("tkGrid").value.trim() || "未填写",
+          team: q("tkTeam").value.trim() || "未填写",
+          wind: num("tkWind"), temp: num("tkTemp"), angle: num("tkAngle"),
+          trialHeight: num("tkTrialHeight"), pause: num("tkPause"), distance: num("tkDistance"),
+          roughDepth: num("tkRoughDepth"), roughArea: num("tkRoughArea"), gasket: num("tkGasket"),
+          sleeve: yes("tkSleeve"), component: yes("tkComponent"), device: yes("tkDevice"),
+          brief: yes("tkBrief"), duty: yes("tkDuty"), plan: yes("tkPlan"),
+        };
+      }
+      function checks(d) {
+        return [
+          { k: "环境安全", ok: d.wind <= 10.8 && d.temp >= 5 && d.temp <= 38, good: `风速 ${d.wind}m/s、温度 ${d.temp}℃，符合吊装窗口`, bad: `风速需≤10.8m/s且温度宜 5-38℃，当前 ${d.wind}m/s / ${d.temp}℃` },
+          { k: "设备完好", ok: d.device && d.angle > 45, good: `设备完好，吊具夹角 ${d.angle}° >45°`, bad: `设备需完好且吊具夹角>45°，当前 ${d.angle}°` },
+          { k: "构件合格", ok: d.component && d.sleeve, good: "构件外观/尺寸合格，灌浆套筒已全数通透", bad: "构件或套筒通透性未满足，禁止试吊" },
+          { k: "方案复核", ok: d.plan, good: "施工方案已复核", bad: "施工方案未复核" },
+          { k: "两到位", ok: d.brief && d.duty, good: "安全交底和责任分工均已到位", bad: "安全交底或责任分工未到位" },
+          { k: "试吊控制", ok: Math.abs(d.trialHeight - 300) <= 20 && d.pause >= 3 && d.distance >= 1.5, good: `试吊 ${d.trialHeight}mm、停顿 ${d.pause}s、安全距离 ${d.distance}倍`, bad: `试吊需约300mm停顿≥3s，安全距离≥1.5倍；当前 ${d.trialHeight}mm/${d.pause}s/${d.distance}倍` },
+          { k: "基层与垫片", ok: d.roughDepth >= 3 && d.roughArea >= 80 && d.gasket > 40, good: `凿毛 ${d.roughDepth}mm / ${d.roughArea}%，垫片距边 ${d.gasket}mm`, bad: `凿毛需≥3mm且面积≥80%，垫片距边线>40mm；当前 ${d.roughDepth}mm/${d.roughArea}%/${d.gasket}mm` },
+        ];
+      }
+      function renderRisk(items) {
+        q("ticketRisk").innerHTML = items.map((x) => `<div class="risk-item ${x.ok ? "good" : "bad"}"><i class="fa ${x.ok ? "fa-check-circle" : "fa-exclamation-triangle"}"></i><div><b>${x.k}</b><div class="muted" style="font-size:13px">${x.ok ? x.good : x.bad}</div></div></div>`).join("");
+      }
+      function localReport(d, items) {
+        const fails = items.filter((x) => !x.ok);
+        if (!fails.length) return `【准许试吊】${d.cid}（${d.grid}）三确认、一复核、两到位均满足；按试吊300mm停顿3秒、无关人员保持≥1.5倍构件高度安全距离执行，关键节点继续拍照上传。`;
+        return `【立停-报告-复核-整改】${d.cid} 存在 ${fails.length} 项风险：${fails.map((x) => x.k).join("、")}。请立即停止试吊，通知项目技术负责人复核，完成整改并重新生成作业票后再启动。`;
+      }
+      function renderHistory() {
+        const list = load();
+        q("ticketCount").textContent = list.length + " 条";
+        q("ticketHistory").innerHTML = list.length ? list.map((t) => `<div class="award"><div class="ic" style="background:${t.pass ? "linear-gradient(135deg,#10b981,#06b6d4)" : "linear-gradient(135deg,#f59e0b,#ef4444)"}"><i class="fa ${t.pass ? "fa-check" : "fa-warning"}"></i></div><div><b>${t.cid} · ${t.command}</b><div class="muted" style="font-size:13px">${t.time} · ${t.grid} · ${t.team} · 准吊指数 ${t.score}%</div><div class="mute2" style="font-size:12px;margin-top:4px">${t.summary}</div></div></div>`).join("") : '<span class="mute2">暂无历史作业票。</span>';
+      }
+      async function generate(fixOnly) {
+        const d = readData();
+        const items = checks(d);
+        const pass = items.every((x) => x.ok);
+        const score = Math.round(items.filter((x) => x.ok).length / items.length * 100);
+        const command = pass ? "准许试吊" : "立停-报告-复核-整改";
+        q("ticketScore").textContent = score + "%";
+        q("ticketBar").style.width = score + "%";
+        q("ticketCommand").textContent = command;
+        q("ticketCommand").style.color = pass ? "#6ee7b7" : "#fca5a5";
+        q("ticketScoreText").textContent = pass ? "全部关键项达标，可进入试吊确认" : "存在未达标项，禁止试吊";
+        renderRisk(items);
+        let report = localReport(d, items);
+        q("ticketReport").innerHTML = `<b>${fixOnly ? "整改闭环生成中" : "AI 作业票生成中"}...</b><div class="muted" style="font-size:13px;margin-top:8px">${report}</div>`;
+        try {
+          if (await AI.available()) {
+            const prompt = `请基于装配式剪力墙吊装作业票数据，输出一份简洁专业的${fixOnly ? "整改闭环单" : "AI作业票"}。要求包含：判定口令、主要风险、整改措施、复核要求、拍照留痕点。数据=${JSON.stringify({ data: d, checks: items, pass, score }, null, 2)}`;
+            report = await AI.chat([
+              { role: "system", content: "你是装配式混凝土构件安装的质量安全总工，回答必须专业、具体、适合施工现场执行，控制在260字内。" },
+              { role: "user", content: prompt },
+            ], { max_tokens: 620, temperature: 0.35 });
+          }
+        } catch (e) {
+          report += `\n\n（AI代理暂不可用，已使用本地规则生成；原因：${e.message}）`;
+        }
+        q("ticketReport").innerHTML = `<b>${command} · ${d.cid}</b><pre style="white-space:pre-wrap;margin:10px 0 0;color:#dbeafe">${report}</pre>`;
+        const list = load();
+        list.unshift({ id: Date.now(), time: now(), cid: d.cid, grid: d.grid, team: d.team, score, pass, command, summary: report.slice(0, 120) });
+        save(list);
+        renderHistory();
+        toast(pass ? "作业票已生成：准许试吊" : "作业票已生成：需整改复核");
+      }
+      fields.forEach((id) => q(id).addEventListener("change", () => {
+        const d = readData(); const items = checks(d); const score = Math.round(items.filter((x) => x.ok).length / items.length * 100);
+        q("ticketScore").textContent = score + "%"; q("ticketBar").style.width = score + "%"; renderRisk(items);
+      }));
+      q("btnTicketRun").addEventListener("click", () => generate(false));
+      q("btnTicketFix").addEventListener("click", () => generate(true));
+      q("btnTicketClear").addEventListener("click", () => { if (confirm("确认清空作业票历史？")) { localStorage.removeItem(key); renderHistory(); toast("作业票历史已清空"); } });
+      AI.available().then((ok) => { q("ticketAiBadge").className = "badge " + (ok ? "green" : "amber"); q("ticketAiBadge").textContent = ok ? "DeepSeek 在线" : "本地规则兜底"; });
+      this._refresh = renderHistory;
+      renderHistory();
+      const d = readData(); renderRisk(checks(d));
+    },
+  });
 
   /* ---------------- 一码溯源 ---------------- */
   M.push({ id: "trace", label: "一码溯源", icon: "fa-qrcode",
@@ -160,32 +309,4 @@
       listCids().then(() => { const cid = initialCidFromUrl(); if (cid) { q("cidInput").value = cid; search(); } });
     },
   });
-
-  /* ---------------- 部署到网址 ---------------- */
-  M.push({ id: "deploy", label: "部署上线", icon: "fa-cloud-upload", render(el) {
-    el.innerHTML = `
-    <h2 class="section-title"><span class="i"></span>部署到网址 · 让平台拥有公开链接</h2>
-    <p class="muted" style="margin:0 0 20px">本平台是<b style="color:#9fe9ff">纯静态单页网站</b>，无需服务器即可运行，可直接上传到任意静态托管，几分钟拥有公开网址。数据默认存在访问者浏览器本地，打开即用。</p>
-    <div class="card glow" style="margin-bottom:18px"><div class="section-title" style="font-size:16px"><span class="i"></span><span class="chip">推荐</span> 方案一：GitHub Pages（免费 · 与参考平台同款）</div>
-      <ol style="line-height:2;padding-left:20px">
-        <li>登录 <a class="link" style="color:var(--cyan)" href="https://github.com" target="_blank">github.com</a>，新建 Public 仓库，如 <code>zhuang-platform</code>。</li>
-        <li>把 <code>zhuang</code> 文件夹内<b>全部文件</b>上传到仓库根目录：<pre>git init
-git add .
-git commit -m "装配式智慧建造指挥中心"
-git branch -M main
-git remote add origin https://github.com/你的用户名/zhuang-platform.git
-git push -u origin main</pre>（或网页 “Add file → Upload files” 拖拽上传。）</li>
-        <li>仓库 <b>Settings → Pages</b>，Source 选 <b>Deploy from a branch</b>，Branch 选 <b>main /(root)</b>，保存。</li>
-        <li>1–2 分钟后得到网址：<code>https://你的用户名.github.io/zhuang-platform/</code>。</li>
-      </ol></div>
-    <div class="card" style="margin-bottom:18px"><div class="section-title" style="font-size:16px"><span class="i"></span>方案二：Netlify / Vercel（拖拽上传，最快）</div>
-      <ol style="line-height:2;padding-left:20px"><li>打开 <a class="link" style="color:var(--cyan)" href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a>。</li><li>把整个 <code>zhuang</code> 文件夹<b>直接拖到网页上</b>。</li><li>几秒生成网址，如 <code>https://xxxx.netlify.app</code>。</li></ol>
-      <p class="muted" style="font-size:13px;margin:0">Vercel 同理：vercel.com → 上传文件夹即可。</p></div>
-    <div class="card" style="border-color:rgba(245,158,11,.35)"><div class="section-title" style="font-size:16px"><span class="i" style="background:linear-gradient(180deg,#fbbf24,#f59e0b)"></span>关于数据存储</div>
-      <ul class="muted" style="font-size:14px;line-height:2;margin:0;padding-left:20px">
-        <li><b style="color:#9fe9ff">静态网址模式：</b>记录保存在每位访问者自己的浏览器（localStorage），首次打开自动注入演示数据，适合展示答辩。</li>
-        <li><b style="color:#9fe9ff">本地完整模式：</b>双击 <code>启动平台.bat</code> 启动内置零依赖后端，数据持久化到 <code>backend/data/records.json</code>。</li>
-        <li>如需多人共享同一份数据，可将后端部署到云服务器，并在页面设置 <code>window.PLATFORM_API="后端地址"</code> 即可自动联网。</li>
-      </ul></div>`;
-  }});
 })();
