@@ -6,12 +6,13 @@
     <div class="lane">
       <div class="card glow">
         <div style="font-size:15px;font-weight:800;margin-bottom:6px"><i class="fa fa-bolt" style="color:var(--cyan)"></i> 演示优先通道</div>
-        <p style="margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.7">按 1号装配慧检、2号智慧工地、3号施工流程、4号一码溯源顺序快速切换，减少等待与空场。点击右侧编号卡片直达模块。</p>
+        <p style="margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.7">按 1号装配慧检、2号智慧工地、3号施工流程、4号AI作业票、5号一码溯源顺序快速切换，减少等待与空场。点击右侧编号卡片直达模块。</p>
       </div>
       <a class="card seq" data-go="huijian"><span class="no">01 装配慧检</span><h4>录入 · 图纸核对</h4><p>实测录入 → 图纸AI核对 → 超差报警。</p></a>
       <a class="card seq" data-go="gongdi"><span class="no">02 智慧工地</span><h4>人机料法环</h4><p>人员/机械/材料/环境实时监控。</p></a>
       <a class="card seq" data-go="liucheng"><span class="no">03 标准工艺</span><h4>五步定标准</h4><p>定位弹线 → 吊装固定 → 节点连接。</p></a>
-      <a class="card seq" data-go="trace"><span class="no">04 一码溯源</span><h4>质量闭环</h4><p>数字身份证 → 工序留痕 → 扫码追溯。</p></a>
+      <a class="card seq" data-go="zuoyepiao"><span class="no">04 AI作业票</span><h4>准吊 · 整改闭环</h4><p>三确认一复核两到位 → AI生成作业票。</p></a>
+      <a class="card seq" data-go="trace"><span class="no">05 一码溯源</span><h4>质量闭环</h4><p>数字身份证 → 工序留痕 → 扫码追溯。</p></a>
     </div>
 
     <div class="holo" id="holo">
