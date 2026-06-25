@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>装配智建 · 和美乡村装配式智慧建造指挥中心</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+<link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<link href="assets/theme.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- 指挥中心头部（由 app.js 构建） -->
+  <header class="cc-head" id="ccHead"></header>
+
+  <!-- 模块视图容器（单页切换，无刷新） -->
+  <main id="view"></main>
+
+  <footer class="foot"><b>装配智建 · 和美乡村装配式智慧建造指挥中心</b> &nbsp;|&nbsp; 规范筑基 · 数字提效 &nbsp;|&nbsp; 用创新筑巢，为乡亲圆梦</footer>
+
+  <!-- 数据层 + 模块 + 应用外壳（顺序：模块先注册，app.js 最后启动） -->
+  <script src="assets/common.js"></script>
+  <script src="assets/mod-dashboard.js"></script>
+  <script src="assets/mod-huijian.js"></script>
+  <script src="assets/mod-gongdi.js"></script>
+  <script src="assets/mod-static.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

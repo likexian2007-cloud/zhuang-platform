@@ -1,0 +1,6 @@
+{
+  "_说明": "复制本文件为 ai-config.json 并填入你的 DeepSeek API Key。ai-config.json 已被 .gitignore，不会上传到仓库。",
+  "deepseekApiKey": "在此填入 sk-xxxx",
+  "baseUrl": "https://api.deepseek.com",
+  "model": "deepseek-chat"
+}

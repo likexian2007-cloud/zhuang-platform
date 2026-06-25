@@ -1,0 +1,11 @@
+{
+  "name": "zhuang-platform-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "装配智建·和美乡村 平台 轻量后端（零依赖）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}
