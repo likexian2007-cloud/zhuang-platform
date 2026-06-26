@@ -22,6 +22,10 @@
         <p>校企合作项目 · 装配式节能结构一体化混凝土墙板技术 · 装配率 95%</p>
       </div>
       <div class="center">
+        <div class="holo-video-frame">
+          <video class="dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video>
+          <div class="video-caption"><i class="fa fa-video-camera"></i> 数字孪生主屏 · 第三段视频</div>
+        </div>
         <svg width="560" height="420" viewBox="0 0 560 420" style="max-width:90%;filter:drop-shadow(0 0 26px rgba(0,200,255,.45))">
           <defs>
             <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7df9ff"/><stop offset="1" stop-color="#1f7fff"/></linearGradient>
@@ -89,14 +93,14 @@
         </div>
       </div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-          <div style="font-size:16px;font-weight:800">现场视频 · 流畅播放</div><span class="badge cyan">MP4证据链</span>
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+          <div style="font-size:16px;font-weight:800">AI 运维总工 · 健康评估</div><span id="bhiAiBadge" class="badge amber">AI检测中</span>
         </div>
-        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">视频采用按需加载，播放一个视频时自动暂停其它视频，保证手机端和网页端播放更稳。</p>
-        <div class="video-grid">
-          <div class="video-card"><video controls preload="metadata" playsinline src="assets/media/prefab-monitor-1.mp4"></video><div class="vcap"><b>吊装巡检</b><span>实景记录</span></div></div>
-          <div class="video-card"><video controls preload="metadata" playsinline src="assets/media/prefab-monitor-2.mp4"></video><div class="vcap"><b>平台演示</b><span>操作流程</span></div></div>
-          <div class="video-card"><video controls preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video><div class="vcap"><b>运维监测</b><span>闭环留痕</span></div></div>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">读取 BHI 传感器实时数据，调用 DeepSeek 生成风险原因、运维处置、复核频率和闭环建议。</p>
+        <div id="bhiAiReport" class="ai-report">等待 AI 健康评估。当前 BHI 数据会实时刷新，点击下方按钮生成专业运维建议。</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button id="btnBhiAI" class="btn btn-cyan btn-sm"><i class="fa fa-magic"></i> AI健康评估</button>
+          <button id="btnBhiLocal" class="btn btn-ghost btn-sm"><i class="fa fa-heartbeat"></i> 本地规则复核</button>
         </div>
       </div>
     </div>
@@ -108,8 +112,9 @@
           <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim)">缩尺模型与现场孪生联动，说明剪力墙吊装、节点连接与基层处理的现场状态。</p></div>
           <span class="badge cyan">现场孪生</span>
         </div>
-        <div class="scene-img" style="margin-top:12px;height:150px;background:radial-gradient(300px 120px at 30% 20%,rgba(0,180,255,.25),transparent),linear-gradient(160deg,#0a1426,#0a1f33);display:grid;place-items:center">
-          <i class="fa fa-cubes" style="font-size:40px;color:rgba(125,249,255,.6)"></i>
+        <div class="scene-img" style="margin-top:12px;height:150px">
+          <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-2.mp4"></video>
+          <div class="video-caption"><i class="fa fa-video-camera"></i> 第二段视频 · 施工实景</div>
         </div>
         <div class="grid g3" style="margin-top:12px">
           <div><b style="font-size:13px">剪力墙吊装</b><p style="margin:2px 0 0;font-size:11px;color:var(--text-dim)">三确认一复核两到位</p></div>
@@ -141,11 +146,9 @@
         <div style="display:flex;justify-content:space-between"><div style="font-size:16px;font-weight:800">装配式建造 · 指挥态势墙</div><span class="badge cyan">实景联动</span></div>
         <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">把剪力墙吊装、节点连接、基层处理与环境监测做成可互动的施工指挥面板。</p>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <div class="scene-img" style="flex:1;min-width:240px;height:180px;background:radial-gradient(220px 120px at 60% 30%,rgba(0,180,255,.25),transparent),linear-gradient(160deg,#0a1426,#0a1f33)">
-            <span class="pt" style="left:18%;top:24%">屋盖结构</span>
-            <span class="pt" style="left:55%;top:46%">剪力墙吊装</span>
-            <span class="pt" style="left:22%;bottom:18%">基层处理</span>
-            <span class="pt" style="right:14%;bottom:24%">节点连接</span>
+          <div class="scene-img" style="flex:1;min-width:240px;height:180px">
+            <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-1.mp4"></video>
+            <div class="video-caption"><i class="fa fa-video-camera"></i> 第一段视频 · 指挥态势墙</div>
           </div>
           <div style="flex:1;min-width:200px">
             <div class="focus" style="padding:10px"><div><b style="font-size:13px">墙体吊装闭合</b><p>高空吊装、节点焊缝、临边防护与传感器布点。</p></div></div>
@@ -171,7 +174,7 @@
     </div>`;
   },
   onShow(el) {
-    const { $, Store } = window.Platform;
+    const { $, Store, AI } = window.Platform;
     // 合格率
     Store.stats().then((s) => { const e = el.querySelector("#fRate"); if (e) e.textContent = (s.total ? Math.round((s.qualified / s.total) * 100) : 100) + "%"; }).catch(() => {});
     if (!this._videoReady) {
@@ -194,6 +197,12 @@
     const sensor = this._sensor || (this._sensor = {
       vib: 0.18, crack: 0.02, tilt: 0.04, disp: 0.3, temp: 22, hum: 58,
     });
+    const localBhiReport = (d) => {
+      if (!d) return "暂无传感器快照，请稍后重试。";
+      const weak = d.items.filter((x) => x.level !== "ok").map((x) => x.name);
+      if (!weak.length) return `【安全运行】BHI ${d.score} 分。振动、裂缝、倾角、位移及温湿度均处于正常区间，建议保持 24h 自动巡检、每周生成一次运维健康报告，并将数据同步到一码溯源档案。`;
+      return `【持续关注】BHI ${d.score} 分。重点关注：${weak.join("、")}。建议提高采样频率，复核对应构件节点和传感器安装状态，形成“预警-派单-复核-销项”闭环。`;
+    };
     const updateBhi = () => {
       sensor.vib = clamp(sensor.vib + (Math.random() - 0.48) * 0.05, 0.08, 0.72);
       sensor.crack = clamp(sensor.crack + (Math.random() - 0.5) * 0.006, 0.01, 0.18);
@@ -229,8 +238,52 @@
       setDot("bhiTiltDot", tiltLv);
       setDot("bhiDispDot", dispLv);
       setDot("bhiHumDot", humLv);
+      this._bhiSnapshot = {
+        score: score.toFixed(1),
+        state: stateText,
+        items: [
+          { name: "振动", value: sensor.vib.toFixed(2) + " mm/s", level: vibLv },
+          { name: "裂缝", value: sensor.crack.toFixed(2) + " mm", level: crackLv },
+          { name: "倾角", value: sensor.tilt.toFixed(2) + "°", level: tiltLv },
+          { name: "位移", value: sensor.disp.toFixed(1) + " mm", level: dispLv },
+          { name: "温湿度", value: Math.round(sensor.temp) + "℃ / " + Math.round(sensor.hum) + "%", level: humLv },
+        ],
+      };
     };
     updateBhi();
+    if (!this._bhiAiReady) {
+      const report = el.querySelector("#bhiAiReport");
+      const aiBtn = el.querySelector("#btnBhiAI");
+      const localBtn = el.querySelector("#btnBhiLocal");
+      const badge = el.querySelector("#bhiAiBadge");
+      AI.available().then((ok) => {
+        if (!badge) return;
+        badge.className = "badge " + (ok ? "green" : "amber");
+        badge.textContent = ok ? "DeepSeek 在线" : "本地规则兜底";
+      });
+      if (localBtn) localBtn.addEventListener("click", () => {
+        if (report) { report.classList.remove("loading"); report.textContent = localBhiReport(this._bhiSnapshot); }
+      });
+      if (aiBtn) aiBtn.addEventListener("click", async () => {
+        if (!report) return;
+        const snap = this._bhiSnapshot;
+        report.classList.add("loading");
+        report.textContent = "AI 正在读取 BHI 传感器数据并生成运维建议...";
+        try {
+          if (!(await AI.available())) throw new Error("AI 后端暂不可用");
+          const reply = await AI.chat([
+            { role: "system", content: "你是装配式建筑智慧运维总工，擅长建筑健康监测、传感器数据分析、风险预警和运维闭环。回答要专业、简洁、可执行，控制在220字内。" },
+            { role: "user", content: "请基于以下 BHI 建筑健康指数数据生成运维健康评估，包含：总体判定、异常识别、风险等级、处置建议、复核频率、归档要求。\n" + JSON.stringify(snap, null, 2) },
+          ], { max_tokens: 560, temperature: 0.35 });
+          report.classList.remove("loading");
+          report.textContent = reply || localBhiReport(snap);
+        } catch (e) {
+          report.classList.remove("loading");
+          report.textContent = localBhiReport(snap) + `\n\n（AI 暂不可用，已使用本地规则；原因：${e.message}）`;
+        }
+      });
+      this._bhiAiReady = true;
+    }
     if (this._timer) return; // 只启动一次
     let wind = 0.4;
     this._timer = setInterval(() => {
