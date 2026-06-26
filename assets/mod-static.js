@@ -21,6 +21,7 @@
     .ticket-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-dim)}.ticket-form input,.ticket-form select{width:100%}
     .ticket-meter{height:10px;border-radius:999px;background:#07101f;border:1px solid var(--line);overflow:hidden}.ticket-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:width .25s ease}
     .risk-list{display:grid;gap:8px}.risk-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(15,23,42,.58)}.risk-item i{margin-top:2px}.risk-item.bad i{color:#fca5a5}.risk-item.good i{color:#6ee7b7}.ticket-card{border-left:3px solid var(--cyan)}
+    .ops-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.ops-tabs button{border:1px solid var(--line);background:rgba(15,23,42,.65);color:var(--text-dim);border-radius:9px;padding:8px 12px;font-weight:800}.ops-tabs button.on{color:#021;background:linear-gradient(135deg,var(--cyan),#38bdf8);border-color:transparent}.ops-view{display:none}.ops-view.on{display:block}.work-card{border-left:3px solid var(--cyan);background:rgba(15,23,42,.55);border-radius:10px;padding:12px;margin-bottom:10px}.heat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.heat-cell{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;background:rgba(15,23,42,.55)}.heat-cell.hot{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.12)}.heat-cell.warn{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.10)}.score-row{display:grid;grid-template-columns:1fr 80px 90px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.12)}.score-bar{height:8px;border-radius:999px;background:#07101f;overflow:hidden;border:1px solid var(--line)}.score-bar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#06b6d4)}
     code,pre{font-family:Consolas,Menlo,monospace}pre{background:#05070f;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;font-size:13px;color:#9fe9ff}`;
     document.head.appendChild(s);
   }
@@ -228,6 +229,206 @@
       this._refresh = renderHistory;
       renderHistory();
       const d = readData(); renderRisk(checks(d));
+    },
+  });
+
+  /* ---------------- AI 闭环中心 ---------------- */
+  M.push({ id: "aiCenter", label: "AI闭环中心", icon: "fa-magic",
+    render(el) {
+      el.innerHTML = `
+      <h2 class="section-title"><span class="i"></span>AI 闭环中心 · 派单 / 规范 / 日志 / 评分</h2>
+      <p class="muted" style="margin:0 0 18px">面向真实施工管理，把“发现问题”继续推进到“AI派单、规范依据、整改复检、日志归档、班组评分”，让平台从展示型看板变成可执行的质量闭环系统。</p>
+      <div class="ops-tabs">
+        <button class="on" data-ops="orders"><i class="fa fa-tasks"></i> 整改派单</button>
+        <button data-ops="spec"><i class="fa fa-book"></i> 规范助手</button>
+        <button data-ops="log"><i class="fa fa-file-text-o"></i> AI施工日志</button>
+        <button data-ops="risk"><i class="fa fa-area-chart"></i> 风险热力/班组评分</button>
+      </div>
+
+      <div class="ops-view on" id="ops_orders">
+        <div class="cols2">
+          <div class="card">
+            <div class="section-title" style="font-size:16px"><span class="i"></span>AI 整改派单</div>
+            <div class="grid g2 ticket-form">
+              <label>问题类型<select id="woType"><option>尺寸超差</option><option>套筒不通透</option><option>钢筋偏位</option><option>安全距离不足</option><option>BHI健康预警</option></select></label>
+              <label>风险等级<select id="woLevel"><option>一般</option><option>较大</option><option>重大</option></select></label>
+              <label>构件/区域<input id="woCid" value="WQ-3F-A5-01"></label>
+              <label>责任班组<input id="woTeam" value="装配一组"></label>
+            </div>
+            <label class="muted" style="display:block;margin-top:12px">问题描述<textarea id="woDesc" rows="4" placeholder="例如：第1面墙高度三点差值超过10mm，需复核垫片标高和斜支撑固定。"></textarea></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+              <button id="btnCreateWO" class="btn btn-cyan"><i class="fa fa-magic"></i> AI生成整改工单</button>
+              <button id="btnSeedWO" class="btn btn-ghost"><i class="fa fa-refresh"></i> 注入示例工单</button>
+            </div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="section-title" style="font-size:16px;margin:0"><span class="i"></span>闭环工单</div><span id="woCount" class="badge cyan">0项</span></div>
+            <div id="woList" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ops-view" id="ops_spec">
+        <div class="cols2">
+          <div class="card">
+            <div class="section-title" style="font-size:16px"><span class="i"></span>AI 规范知识库问答</div>
+            <textarea id="specQ" rows="5" placeholder="问：吊装前需要检查哪些条件？灌浆套筒不通透怎么处理？裂缝监测报警怎么办？"></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+              <button id="btnSpecAsk" class="btn btn-cyan"><i class="fa fa-comments"></i> AI查询规范</button>
+              <button class="btn btn-ghost btn-sm spec-fast" data-q="吊装前三确认一复核两到位怎么执行？">吊装前复核</button>
+              <button class="btn btn-ghost btn-sm spec-fast" data-q="灌浆套筒不通透如何整改复检？">套筒整改</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="font-size:16px"><span class="i"></span>规范答复</div>
+            <div id="specAns" class="ai-report">等待提问。AI 会结合装配式施工标准、质量验收和现场安全管理要点回答。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ops-view" id="ops_log">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div class="section-title" style="font-size:16px;margin:0"><span class="i"></span>AI 施工日志 / 日报</div><button id="btnGenLog" class="btn btn-cyan"><i class="fa fa-file-text-o"></i> 生成今日施工日志</button></div>
+          <div id="dailyLog" class="ai-report" style="margin-top:12px">将自动汇总吊装记录、质量合格率、整改工单、风险点和次日计划。</div>
+        </div>
+      </div>
+
+      <div class="ops-view" id="ops_risk">
+        <div class="cols2">
+          <div class="card">
+            <div class="section-title" style="font-size:16px"><span class="i"></span>轴线/构件风险热力图</div>
+            <div id="heatMap" class="heat-grid"></div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="font-size:16px"><span class="i"></span>班组质量评分榜</div>
+            <div id="teamScore"></div>
+          </div>
+        </div>
+      </div>`;
+      this.setup(el);
+    },
+    onShow(el) { if (this._refresh) this._refresh(); },
+    setup(root) {
+      const { toast, now, Store, AI } = window.Platform;
+      const q = (id) => root.querySelector("#" + id);
+      const key = "zhuang_workorders_v1";
+      const load = () => { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } };
+      const save = (list) => localStorage.setItem(key, JSON.stringify(list.slice(0, 60)));
+      const localAdvice = (d) => {
+        const map = {
+          "尺寸超差": "复核测量基准线、垫片标高和斜支撑固定，整改后对同组高度/宽度三点复测，偏差合格后销项。",
+          "套筒不通透": "暂停灌浆，清理套筒孔道并通球复验，保留复检照片和编号，合格后再进入节点连接。",
+          "钢筋偏位": "复核轴线和定位器，调整纵筋位置，确保外露长度、间距和保护层满足图纸要求。",
+          "安全距离不足": "立即清场，设置警戒线，安全距离不小于构件高度1.5倍，重新交底后作业。",
+          "BHI健康预警": "提高传感器采样频率，复核裂缝、倾角、位移点位，形成运维巡检工单并归档。",
+        };
+        return map[d.type] || "按预警-派单-整改-复检-销项流程闭环，关键节点拍照留痕。";
+      };
+      function renderOrders() {
+        const list = load();
+        q("woCount").textContent = list.length + "项";
+        q("woList").innerHTML = list.length ? list.map((o) => `<div class="work-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${o.type} · ${o.cid}</b><span class="badge ${o.status === "已销项" ? "green" : o.level === "重大" ? "red" : "amber"}">${o.status}</span></div><div class="muted" style="font-size:13px;margin:6px 0">${o.team} · ${o.level}风险 · ${o.time}</div><div style="font-size:13px;line-height:1.7;color:#dbeafe;white-space:pre-wrap">${o.advice}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-sm btn-ghost wo-next" data-id="${o.id}">${o.status === "已销项" ? "重新打开" : "推进状态"}</button></div></div>`).join("") : '<span class="mute2">暂无整改工单。</span>';
+        root.querySelectorAll(".wo-next").forEach((btn) => btn.addEventListener("click", () => {
+          const list = load();
+          const item = list.find((x) => String(x.id) === btn.dataset.id);
+          if (item) item.status = item.status === "待整改" ? "待复检" : item.status === "待复检" ? "已销项" : "待整改";
+          save(list); renderOrders(); renderRisk();
+        }));
+      }
+      async function createOrder() {
+        const d = { type: q("woType").value, level: q("woLevel").value, cid: q("woCid").value.trim() || "未填写", team: q("woTeam").value.trim() || "未分配", desc: q("woDesc").value.trim() || "现场发现质量/安全风险，需整改闭环。" };
+        let advice = localAdvice(d);
+        try {
+          if (await AI.available()) {
+            advice = await AI.chat([
+              { role: "system", content: "你是装配式建筑质量安全总监，请生成可执行整改工单，包含原因、整改步骤、复检标准、照片留痕点、截止要求，180字内。" },
+              { role: "user", content: JSON.stringify(d, null, 2) },
+            ], { max_tokens: 520, temperature: 0.35 });
+          }
+        } catch (e) { advice += `\n（AI暂不可用，已使用本地规则：${e.message}）`; }
+        const list = load();
+        list.unshift({ id: Date.now(), time: now(), status: "待整改", advice, ...d });
+        save(list); renderOrders(); renderRisk(); toast("整改工单已生成");
+      }
+      function seedOrders() {
+        const list = load();
+        [
+          { type: "尺寸超差", level: "较大", cid: "WQ-3F-A5-01", team: "装配一组", desc: "高度三点差值超过10mm" },
+          { type: "套筒不通透", level: "重大", cid: "WQ-3F-A6-02", team: "装配二组", desc: "灌浆套筒通透性不足" },
+          { type: "BHI健康预警", level: "一般", cid: "3号房-运维点位T02", team: "运维组", desc: "倾角监测进入关注区间" },
+        ].forEach((d, i) => list.unshift({ id: Date.now() + i, time: now(), status: i === 0 ? "待复检" : "待整改", advice: localAdvice(d), ...d }));
+        save(list); renderOrders(); renderRisk(); toast("示例工单已注入");
+      }
+      const specLocal = (text) => {
+        if (/套筒|灌浆/.test(text)) return "套筒不通透应暂停进入下一工序，清孔、通球或内窥复核，确认孔道畅通后再灌浆；复检照片、套筒编号和责任人需同步归档。";
+        if (/吊装|三确认|试吊/.test(text)) return "吊装前执行三确认（环境安全、设备完好、构件合格）、一复核（方案复核）、两到位（安全交底、责任分工）。试吊约300mm并停顿3秒，安全距离不小于构件高度1.5倍。";
+        if (/裂缝|倾角|位移|BHI|健康/.test(text)) return "运维监测发现裂缝、倾角或位移异常时，应提高采样频率，复核传感器和构件节点，按预警等级生成巡检工单并跟踪销项。";
+        return "建议按“标准依据-现场复核-整改措施-复检销项-资料归档”的格式处理，并将关键节点照片绑定到构件二维码。";
+      };
+      async function askSpec() {
+        const text = q("specQ").value.trim();
+        if (!text) return alert("请输入规范问题");
+        q("specAns").classList.add("loading");
+        q("specAns").textContent = "AI 正在查询规范知识库...";
+        let ans = specLocal(text);
+        try {
+          if (await AI.available()) {
+            ans = await AI.chat([
+              { role: "system", content: "你是装配式混凝土建筑施工规范助手。回答要引用施工/验收/安全管理要点，给出可执行步骤，避免编造具体条文号，220字内。" },
+              { role: "user", content: text },
+            ], { max_tokens: 560, temperature: 0.25 });
+          }
+        } catch (e) { ans += `\n\n（AI暂不可用，已使用本地规范库：${e.message}）`; }
+        q("specAns").classList.remove("loading");
+        q("specAns").textContent = ans;
+      }
+      async function genLog() {
+        const recs = await Store.list();
+        const orders = load();
+        const stats = await Store.stats().catch(() => ({}));
+        const payload = { date: new Date().toLocaleDateString("zh-CN"), recordCount: recs.length, qualified: stats.qualified, warning: stats.warning, unqualified: stats.unqualified, openOrders: orders.filter((o) => o.status !== "已销项").length, orders: orders.slice(0, 6) };
+        let text = `【施工日志】${payload.date}\n今日累计记录 ${payload.recordCount} 条，合格 ${payload.qualified || 0} 条，预警 ${payload.warning || 0} 条，不合格 ${payload.unqualified || 0} 条；未销项工单 ${payload.openOrders} 项。明日重点复核尺寸超差、套筒通透和BHI运维点位。`;
+        q("dailyLog").classList.add("loading");
+        q("dailyLog").textContent = "AI 正在汇总施工日志...";
+        try {
+          if (await AI.available()) {
+            text = await AI.chat([
+              { role: "system", content: "你是项目技术负责人，请生成装配式施工日报，包含完成情况、质量问题、整改闭环、安全环境、明日计划，260字内。" },
+              { role: "user", content: JSON.stringify(payload, null, 2) },
+            ], { max_tokens: 720, temperature: 0.35 });
+          }
+        } catch (e) { text += `\n\n（AI暂不可用，已使用本地日报模板：${e.message}）`; }
+        q("dailyLog").classList.remove("loading");
+        q("dailyLog").textContent = text;
+      }
+      async function renderRisk() {
+        const recs = await Store.list().catch(() => []);
+        const orders = load();
+        const zones = ["A1", "A2", "A3", "A4", "A5", "A6"];
+        q("heatMap").innerHTML = zones.map((z, idx) => {
+          const count = orders.filter((o) => (o.cid || "").includes(String(idx + 1)) || (o.cid || "").includes(z)).length + recs.filter((r) => JSON.stringify(r).includes(`A${idx + 1}`) && r.status !== "合格").length;
+          const cls = count >= 3 ? "hot" : count >= 1 ? "warn" : "";
+          return `<div class="heat-cell ${cls}"><b>${z}轴</b><div class="num-big" style="font-size:24px">${count}</div><div class="mute2" style="font-size:12px">${count ? "需复核" : "正常"}</div></div>`;
+        }).join("");
+        const teams = ["装配一组", "装配二组", "运维组", "质量组"].map((t) => {
+          const open = orders.filter((o) => o.team === t && o.status !== "已销项").length;
+          const closed = orders.filter((o) => o.team === t && o.status === "已销项").length;
+          return { t, score: Math.max(72, 100 - open * 8 + closed * 2), open };
+        }).sort((a, b) => b.score - a.score);
+        q("teamScore").innerHTML = teams.map((x) => `<div class="score-row"><div><b>${x.t}</b><div class="score-bar"><i style="width:${x.score}%"></i></div></div><b>${x.score}</b><span class="badge ${x.open ? "amber" : "green"}">${x.open}未销项</span></div>`).join("");
+      }
+      root.querySelectorAll(".ops-tabs button").forEach((btn) => btn.addEventListener("click", () => {
+        root.querySelectorAll(".ops-tabs button").forEach((b) => b.classList.toggle("on", b === btn));
+        root.querySelectorAll(".ops-view").forEach((v) => v.classList.toggle("on", v.id === "ops_" + btn.dataset.ops));
+        if (btn.dataset.ops === "risk") renderRisk();
+      }));
+      root.querySelectorAll(".spec-fast").forEach((btn) => btn.addEventListener("click", () => { q("specQ").value = btn.dataset.q; askSpec(); }));
+      q("btnCreateWO").addEventListener("click", createOrder);
+      q("btnSeedWO").addEventListener("click", seedOrders);
+      q("btnSpecAsk").addEventListener("click", askSpec);
+      q("btnGenLog").addEventListener("click", genLog);
+      this._refresh = () => { renderOrders(); renderRisk(); };
+      renderOrders(); renderRisk();
     },
   });
 
