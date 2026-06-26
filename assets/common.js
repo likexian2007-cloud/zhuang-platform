@@ -75,7 +75,13 @@
   // - 通过 file:// 直接打开时：纯离线，使用 localStorage。
   const isHttp = location.protocol === "http:" || location.protocol === "https:";
   const API_BASE = (window.PLATFORM_API != null ? window.PLATFORM_API : (isHttp ? "" : null));
+  const API_TOKEN = window.PLATFORM_TOKEN || "";
   const LS_KEY = "zhuang_records_v1";
+  function apiHeaders(extra = {}) {
+    const headers = Object.assign({}, extra);
+    if (API_TOKEN) headers["X-Platform-Token"] = API_TOKEN;
+    return headers;
+  }
 
   let _onlineCache = null, _onlineAt = 0;
   async function _backendOnline() {
@@ -114,7 +120,7 @@
         try {
           const r = await fetch(API_BASE + "/api/records", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: apiHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(record),
           });
           if (r.ok) return await r.json();
@@ -130,7 +136,7 @@
         try {
           const r = await fetch(API_BASE + "/api/records/" + encodeURIComponent(id), {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: apiHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(patch),
           });
           if (r.ok) return await r.json();
@@ -146,7 +152,7 @@
     async remove(id) {
       if (await _backendOnline()) {
         try {
-          const r = await fetch(API_BASE + "/api/records/" + encodeURIComponent(id), { method: "DELETE" });
+          const r = await fetch(API_BASE + "/api/records/" + encodeURIComponent(id), { method: "DELETE", headers: apiHeaders() });
           if (r.ok) return await r.json();
         } catch {}
       }
@@ -264,7 +270,7 @@
     // messages: [{role:'system'|'user'|'assistant', content}]；失败抛错由调用方回退
     async chat(messages, opts = {}) {
       const r = await fetch((API_BASE || "") + "/api/ai", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: apiHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ messages, temperature: opts.temperature, max_tokens: opts.max_tokens }),
       });
       const j = await r.json().catch(() => ({}));
@@ -274,7 +280,7 @@
     async extractDrawing(text) {
       const r = await fetch((API_BASE || "") + "/api/drawing/extract", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: apiHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ text }),
       });
       const j = await r.json().catch(() => ({}));

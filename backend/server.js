@@ -14,6 +14,12 @@ const PORT = process.env.PORT || 8080;
 const ROOT = path.join(__dirname, "..");            // 前端根目录（zhuang/）
 const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "records.json");
+const API_TOKEN = process.env.PLATFORM_API_TOKEN || "";
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:8080,http://127.0.0.1:8080,https://likexian2007-cloud.github.io")
+  .split(",").map((x) => x.trim()).filter(Boolean);
+const RATE_WINDOW_MS = Number(process.env.RATE_WINDOW_MS || 60000);
+const RATE_LIMIT = Number(process.env.RATE_LIMIT || 180);
+const rateBuckets = new Map();
 
 /* ---- AI 配置（key 仅存服务端，已 .gitignore，不随前端/仓库泄露） ---- */
 const AI_CONFIG_FILE = path.join(__dirname, "ai-config.json");
@@ -186,9 +192,53 @@ const MIME = {
   ".svg": "image/svg+xml", ".ico": "image/x-icon", ".mp4": "video/mp4",
 };
 
-function sendJSON(res, code, obj) {
+function clientIp(req) {
+  return String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "local").split(",")[0].trim();
+}
+
+function corsOrigin(req) {
+  const origin = req.headers.origin;
+  if (!origin) return "*";
+  return ALLOWED_ORIGINS.some((x) => origin === x || origin.startsWith(x + "/")) ? origin : "";
+}
+
+function securityHeaders(req, extra = {}) {
+  const origin = corsOrigin(req);
+  return Object.assign({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(self), microphone=(), geolocation=()",
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": origin || "null",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Platform-Token",
+  }, extra);
+}
+
+function rateLimited(req) {
+  const key = clientIp(req);
+  const nowMs = Date.now();
+  const bucket = rateBuckets.get(key) || { start: nowMs, count: 0 };
+  if (nowMs - bucket.start > RATE_WINDOW_MS) {
+    bucket.start = nowMs;
+    bucket.count = 0;
+  }
+  bucket.count += 1;
+  rateBuckets.set(key, bucket);
+  return bucket.count > RATE_LIMIT;
+}
+
+function requireApiToken(req, res) {
+  if (!API_TOKEN) return true;
+  if (req.headers["x-platform-token"] === API_TOKEN) return true;
+  sendJSON(req, res, 401, { error: "Unauthorized" });
+  return false;
+}
+
+function sendJSON(req, res, code, obj) {
   const body = JSON.stringify(obj);
-  res.writeHead(code, { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" });
+  res.writeHead(code, securityHeaders(req, { "Content-Type": "application/json; charset=utf-8" }));
   res.end(body);
 }
 
@@ -202,15 +252,15 @@ function serveStatic(req, res, pathname) {
     blocked.includes("ai-config") ||
     blocked.includes("records.json")
   ) {
-    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    res.writeHead(403, securityHeaders(req, { "Content-Type": "text/plain; charset=utf-8" }));
     return res.end("Forbidden");
   }
   // 防目录穿越
   const filePath = path.join(ROOT, path.normalize(rel).replace(/^(\.\.[/\\])+/, ""));
-  if (!filePath.startsWith(ROOT)) { res.writeHead(403); return res.end("Forbidden"); }
+  if (!filePath.startsWith(ROOT)) { res.writeHead(403, securityHeaders(req)); return res.end("Forbidden"); }
   fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("404 Not Found"); }
-    res.writeHead(200, { "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream" });
+    if (err) { res.writeHead(404, securityHeaders(req, { "Content-Type": "text/plain; charset=utf-8" })); return res.end("404 Not Found"); }
+    res.writeHead(200, securityHeaders(req, { "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream" }));
     res.end(data);
   });
 }
@@ -218,57 +268,61 @@ function serveStatic(req, res, pathname) {
 const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
   const pathname = parsed.pathname;
+  if (rateLimited(req)) return sendJSON(req, res, 429, { error: "Too many requests" });
 
   // CORS 预检
   if (req.method === "OPTIONS") {
-    res.writeHead(204, { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type" });
+    res.writeHead(204, securityHeaders(req));
     return res.end();
   }
 
   // ---- API ----
-  if (pathname === "/api/health") return sendJSON(res, 200, { ok: true, time: Date.now() });
+  if (pathname === "/api/health") return sendJSON(req, res, 200, { ok: true, time: Date.now() });
 
   // AI 是否可用
-  if (pathname === "/api/ai/health") return sendJSON(res, 200, { enabled: AI_ENABLED, model: AI_CFG.model });
+  if (pathname === "/api/ai/health") return sendJSON(req, res, 200, { enabled: AI_ENABLED, model: AI_CFG.model });
 
   // AI 对话/分析代理（key 不出服务端）
   if (pathname === "/api/ai" && req.method === "POST") {
+    if (!requireApiToken(req, res)) return;
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 2e6) req.destroy(); });
     req.on("end", async () => {
       try {
         const { messages, temperature, max_tokens } = JSON.parse(body || "{}");
-        if (!Array.isArray(messages) || !messages.length) return sendJSON(res, 400, { error: "messages 不能为空" });
+        if (!Array.isArray(messages) || !messages.length) return sendJSON(req, res, 400, { error: "messages 不能为空" });
         const content = await callDeepSeek(messages, { temperature, max_tokens });
-        sendJSON(res, 200, { content });
-      } catch (e) { sendJSON(res, 502, { error: e.message }); }
+        sendJSON(req, res, 200, { content });
+      } catch (e) { sendJSON(req, res, 502, { error: e.message }); }
     });
     return;
   }
 
   if (pathname === "/api/drawing/extract" && req.method === "POST") {
+    if (!requireApiToken(req, res)) return;
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 2e6) req.destroy(); });
     req.on("end", async () => {
       try {
         const { text } = JSON.parse(body || "{}");
-        if (!text || String(text).trim().length < 5) return sendJSON(res, 400, { error: "请提供图纸 OCR 文字或图纸参数文本" });
+        if (!text || String(text).trim().length < 5) return sendJSON(req, res, 400, { error: "请提供图纸 OCR 文字或图纸参数文本" });
         try {
           const params = await extractDrawingWithAI(text);
-          sendJSON(res, 200, { params, source: "deepseek" });
+          sendJSON(req, res, 200, { params, source: "deepseek" });
         } catch (e) {
           const params = localExtractDrawing(text);
-          sendJSON(res, 200, { params, source: "local", warning: e.message });
+          sendJSON(req, res, 200, { params, source: "local", warning: e.message });
         }
-      } catch (e) { sendJSON(res, 400, { error: e.message }); }
+      } catch (e) { sendJSON(req, res, 400, { error: e.message }); }
     });
     return;
   }
 
   if (pathname === "/api/records" && req.method === "GET") {
-    return sendJSON(res, 200, readRecords());
+    return sendJSON(req, res, 200, readRecords());
   }
   if (pathname === "/api/records" && req.method === "POST") {
+    if (!requireApiToken(req, res)) return;
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 25e6) req.destroy(); });
     req.on("end", () => {
@@ -279,19 +333,20 @@ const server = http.createServer((req, res) => {
         const list = readRecords();
         list.push(rec);
         writeRecords(list);
-        sendJSON(res, 200, rec);
-      } catch (e) { sendJSON(res, 400, { error: "invalid json" }); }
+        sendJSON(req, res, 200, rec);
+      } catch (e) { sendJSON(req, res, 400, { error: "invalid json" }); }
     });
     return;
   }
   if (pathname.startsWith("/api/records/") && (req.method === "PUT" || req.method === "DELETE")) {
+    if (!requireApiToken(req, res)) return;
     const id = decodeURIComponent(pathname.slice("/api/records/".length));
-    if (!id) return sendJSON(res, 400, { error: "record id required" });
+    if (!id) return sendJSON(req, res, 400, { error: "record id required" });
     if (req.method === "DELETE") {
       const list = readRecords();
       const next = list.filter((r) => r.id !== id);
       writeRecords(next);
-      return sendJSON(res, 200, { ok: true, deleted: list.length - next.length });
+      return sendJSON(req, res, 200, { ok: true, deleted: list.length - next.length });
     }
     let body = "";
     req.on("data", (c) => { body += c; if (body.length > 25e6) req.destroy(); });
@@ -300,17 +355,17 @@ const server = http.createServer((req, res) => {
         const patch = JSON.parse(body || "{}");
         const list = readRecords();
         const idx = list.findIndex((r) => r.id === id);
-        if (idx < 0) return sendJSON(res, 404, { error: "record not found" });
+        if (idx < 0) return sendJSON(req, res, 404, { error: "record not found" });
         list[idx] = Object.assign({}, list[idx], patch, { id, updatedAt: new Date().toLocaleString("zh-CN") });
         writeRecords(list);
-        sendJSON(res, 200, list[idx]);
-      } catch (e) { sendJSON(res, 400, { error: "invalid json" }); }
+        sendJSON(req, res, 200, list[idx]);
+      } catch (e) { sendJSON(req, res, 400, { error: "invalid json" }); }
     });
     return;
   }
   if (pathname === "/api/stats" && req.method === "GET") {
     const list = readRecords();
-    return sendJSON(res, 200, {
+    return sendJSON(req, res, 200, {
       total: list.length,
       qualified: list.filter((x) => x.status === "合格").length,
       warning: list.filter((x) => x.status === "预警").length,

@@ -235,6 +235,9 @@ body.low-power *{transition:none!important}
 .login-brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}.login-brand img{width:44px;height:44px}.login-brand b{font-size:18px;display:block}.login-brand span{font-size:12px;color:var(--text-dim);letter-spacing:1px}
 .login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}.login-tabs button{border:1px solid var(--line);background:rgba(15,23,42,.7);color:var(--text-dim);border-radius:9px;padding:9px;font-weight:700}.login-tabs button.on{color:#021;background:linear-gradient(135deg,var(--cyan),#22d3ee);border-color:transparent}
 .login-card label{display:block;color:var(--text-dim);margin-bottom:10px}.login-card label input{margin-top:6px}
+.security-note{font-size:12px;line-height:1.7;color:#9fb3c8;margin-top:12px;padding:10px;border:1px dashed rgba(34,211,238,.35);border-radius:9px;background:rgba(6,14,30,.55)}
+.copyright-watermark{position:fixed;right:14px;bottom:10px;z-index:900;display:flex;flex-direction:column;gap:2px;pointer-events:none;text-align:right;color:rgba(191,247,255,.38);font-size:11px;letter-spacing:.5px;text-shadow:0 0 10px rgba(0,229,255,.25)}
+.copyright-watermark::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:repeating-linear-gradient(-28deg,transparent 0 120px,rgba(125,249,255,.035) 120px 122px,transparent 122px 260px);mix-blend-mode:screen}
 
 /* ====================== 大屏模块 ====================== */
 .lane{display:grid;grid-template-columns:1.5fr repeat(6,1fr);gap:14px;margin-bottom:16px}
