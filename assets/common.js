@@ -253,8 +253,11 @@
     async available() {
       if (API_BASE == null) return false; // file:// 纯离线
       if (this._enabled !== null && Date.now() - this._checkedAt < 15000) return this._enabled;
-      try { const r = await fetch((API_BASE || "") + "/api/ai/health"); this._enabled = r.ok ? !!(await r.json()).enabled : false; }
-      catch { this._enabled = false; }
+      try {
+        const r = await fetch((API_BASE || "") + "/api/ai/health");
+        this._enabled = r.ok ? !!(await r.json()).enabled : !!API_BASE;
+      }
+      catch { this._enabled = !!API_BASE; }
       this._checkedAt = Date.now();
       return this._enabled;
     },
