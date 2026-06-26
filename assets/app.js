@@ -11,29 +11,62 @@
   const cache = {};
   let current = null;
 
+  const ACCESS_HASH = "ae27b5d6f9a09319d15ffb48a9674f76a07bdfd48b5b38addd3a832808ceceac";
+  const ACCESS_MARK = "ip-protected-v1";
+  const COPYRIGHT_OWNER = "装配智建·和美乡村项目组";
+  async function sha256(text) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function buildProtectionLayer() {
+    if (document.getElementById("copyrightWatermark")) return;
+    const mark = document.createElement("div");
+    mark.id = "copyrightWatermark";
+    mark.className = "copyright-watermark";
+    mark.innerHTML = `<span>${COPYRIGHT_OWNER}</span><span>内部演示资料 · 未经授权禁止复制传播</span>`;
+    document.body.appendChild(mark);
+
+    const notice = () => toast("已启用版权保护：禁止未授权复制、截图传播或二次商用");
+    document.addEventListener("contextmenu", (e) => { e.preventDefault(); notice(); });
+    document.addEventListener("dragstart", (e) => e.preventDefault());
+    document.addEventListener("copy", (e) => {
+      e.clipboardData.setData("text/plain", `${COPYRIGHT_OWNER} 版权所有。未经授权禁止复制传播。`);
+      e.preventDefault();
+      notice();
+    });
+    document.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && ["s", "u", "p"].includes(k)) {
+        e.preventDefault();
+        notice();
+      }
+    });
+  }
+
   function buildLoginGate() {
-    if (localStorage.getItem("zhuang_login_ok") === "1") return;
+    buildProtectionLayer();
+    if (sessionStorage.getItem("zhuang_access_ok") === ACCESS_MARK || localStorage.getItem("zhuang_login_ok") === ACCESS_MARK) return;
     const gate = document.createElement("div");
     gate.className = "login-gate";
     gate.innerHTML = `
       <div class="login-card">
-        <div class="login-brand"><img src="assets/logo.svg" alt=""><div><b>装配智建智慧管理平台</b><span>和美乡村 · 装配式建造质量中控</span></div></div>
-        <div class="login-tabs"><button class="on">账号登录</button><button>项目演示</button></div>
-        <label>账号<input id="loginUser" value="admin" autocomplete="username"></label>
-        <label>密码<input id="loginPass" value="admin" type="password" autocomplete="current-password"></label>
-        <button id="loginEnter" class="btn btn-cyan" style="width:100%;margin-top:8px"><i class="fa fa-sign-in"></i> 进入平台</button>
-        <div class="mute2" style="font-size:12px;margin-top:10px;text-align:center">本地演示账号：admin / admin</div>
+        <div class="login-brand"><img src="assets/logo.svg" alt=""><div><b>装配智建智慧管理平台</b><span>和美乡村 · 版权保护访问</span></div></div>
+        <div class="login-tabs"><button class="on">授权访问</button><button>版权声明</button></div>
+        <label>项目访问码<input id="loginPass" type="password" autocomplete="current-password" placeholder="请输入项目组授权访问码"></label>
+        <button id="loginEnter" class="btn btn-cyan" style="width:100%;margin-top:8px"><i class="fa fa-shield"></i> 验证并进入平台</button>
+        <div class="security-note">本平台为原创竞赛作品与项目资料展示系统，已启用访问控制、水印标记、防复制提示和接口安全策略。未经授权禁止下载、复刻、商用或二次传播。</div>
       </div>`;
     document.body.appendChild(gate);
-    const enter = () => {
-      const u = $("loginUser").value.trim();
+    const enter = async () => {
       const p = $("loginPass").value.trim();
-      if (u === "admin" && p === "admin") {
-        localStorage.setItem("zhuang_login_ok", "1");
+      if (await sha256(p) === ACCESS_HASH) {
+        sessionStorage.setItem("zhuang_access_ok", ACCESS_MARK);
+        localStorage.setItem("zhuang_login_ok", ACCESS_MARK);
         gate.remove();
-        toast("欢迎进入装配智建平台");
+        toast("授权验证通过，版权保护系统已启用");
       } else {
-        alert("账号或密码错误");
+        alert("访问码错误，请联系项目组获取授权。");
       }
     };
     $("loginEnter").addEventListener("click", enter);
