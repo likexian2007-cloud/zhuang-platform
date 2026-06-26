@@ -6,13 +6,14 @@
     <div class="lane">
       <div class="card glow">
         <div style="font-size:15px;font-weight:800;margin-bottom:6px"><i class="fa fa-bolt" style="color:var(--cyan)"></i> 演示优先通道</div>
-        <p style="margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.7">按装配慧检、智慧工地、施工流程、AI作业票、一码溯源顺序快速切换；首页同步显示运维阶段 BHI 建筑健康指数，形成全生命周期闭环。</p>
+        <p style="margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.7">按装配慧检、智慧工地、施工流程、AI作业票、AI闭环中心、一码溯源顺序快速切换；首页同步显示运维阶段 BHI 建筑健康指数，形成全生命周期闭环。</p>
       </div>
       <a class="card seq" data-go="huijian"><span class="no">01 装配慧检</span><h4>录入 · 图纸核对</h4><p>实测录入 → 图纸AI核对 → 超差报警。</p></a>
       <a class="card seq" data-go="gongdi"><span class="no">02 智慧工地</span><h4>人机料法环</h4><p>人员/机械/材料/环境实时监控。</p></a>
       <a class="card seq" data-go="liucheng"><span class="no">03 标准工艺</span><h4>五步定标准</h4><p>定位弹线 → 吊装固定 → 节点连接。</p></a>
       <a class="card seq" data-go="zuoyepiao"><span class="no">04 AI作业票</span><h4>准吊 · 整改闭环</h4><p>三确认一复核两到位 → AI生成作业票。</p></a>
-      <a class="card seq" data-go="trace"><span class="no">05 一码溯源</span><h4>质量闭环</h4><p>数字身份证 → 工序留痕 → 扫码追溯。</p></a>
+      <a class="card seq" data-go="aiCenter"><span class="no">05 AI闭环中心</span><h4>派单 · 日志 · 评分</h4><p>整改派单 → 规范问答 → 日志热力图。</p></a>
+      <a class="card seq" data-go="trace"><span class="no">06 一码溯源</span><h4>质量闭环</h4><p>数字身份证 → 工序留痕 → 扫码追溯。</p></a>
     </div>
 
     <div class="holo" id="holo">
@@ -22,52 +23,27 @@
         <p>校企合作项目 · 装配式节能结构一体化混凝土墙板技术 · 装配率 95%</p>
       </div>
       <div class="center">
-        <div class="holo-video-frame">
-          <video class="dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video>
-          <div class="video-caption"><i class="fa fa-video-camera"></i> 数字孪生主屏 · 第三段视频</div>
-        </div>
-        <svg width="560" height="420" viewBox="0 0 560 420" style="max-width:90%;filter:drop-shadow(0 0 26px rgba(0,200,255,.45))">
-          <defs>
-            <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7df9ff"/><stop offset="1" stop-color="#1f7fff"/></linearGradient>
-            <linearGradient id="wallF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(0,200,255,.28)"/><stop offset="1" stop-color="rgba(0,90,200,.08)"/></linearGradient>
-            <linearGradient id="roofF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(125,249,255,.35)"/><stop offset="1" stop-color="rgba(30,120,255,.12)"/></linearGradient>
-          </defs>
-          <polygon points="280,300 470,360 280,420 90,360" fill="rgba(0,150,255,.10)" stroke="url(#edge)" stroke-width="1.5"/>
-          <polygon points="280,278 430,326 280,374 130,326" fill="rgba(0,150,255,.06)" stroke="rgba(125,249,255,.4)" stroke-width="1"/>
-          <polygon points="160,196 280,234 280,330 160,292" fill="url(#wallF)" stroke="url(#edge)" stroke-width="1.6"/>
-          <polygon points="280,234 400,196 400,292 280,330" fill="url(#wallF)" stroke="url(#edge)" stroke-width="1.6"/>
-          <polygon points="160,196 280,158 400,196 280,234" fill="url(#roofF)" stroke="url(#edge)" stroke-width="1.8"/>
-          <polygon points="195,238 235,251 235,300 195,287" fill="rgba(0,229,255,.12)" stroke="rgba(125,249,255,.55)" stroke-width="1"/>
-          <polygon points="325,251 365,238 365,287 325,300" fill="rgba(0,229,255,.12)" stroke="rgba(125,249,255,.55)" stroke-width="1"/>
-          <g fill="#7df9ff"><circle cx="190" cy="288" r="2.4"/><circle cx="214" cy="296" r="2.4"/><circle cx="238" cy="304" r="2.4"/><circle cx="322" cy="304" r="2.4"/><circle cx="346" cy="296" r="2.4"/><circle cx="370" cy="288" r="2.4"/></g>
-          <g opacity="0.95">
-            <line x1="280" y1="20" x2="280" y2="86" stroke="#7df9ff" stroke-width="1.4" stroke-dasharray="4 4"/>
-            <polygon points="232,90 328,90 328,150 232,150" fill="rgba(0,229,255,.18)" stroke="url(#edge)" stroke-width="1.6"/>
-            <line x1="248" y1="90" x2="280" y2="64" stroke="#7df9ff" stroke-width="1"/>
-            <line x1="312" y1="90" x2="280" y2="64" stroke="#7df9ff" stroke-width="1"/>
-            <circle cx="280" cy="62" r="4" fill="none" stroke="#7df9ff" stroke-width="1.4"/>
-            <text x="280" y="126" fill="#bdf3ff" font-size="12" text-anchor="middle" font-family="sans-serif">预制剪力墙吊装</text>
-          </g>
-          <ellipse cx="280" cy="360" rx="150" ry="36" fill="none" stroke="rgba(0,229,255,.35)" stroke-width="1">
-            <animate attributeName="rx" values="60;175;60" dur="4s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite"/>
-          </ellipse>
-        </svg>
-      </div>
-      <div class="bhi-panel">
-        <div class="bhi-head">
-          <div>
-            <div class="label"><i class="fa fa-heartbeat"></i> 建筑健康指数 Building Health Index</div>
-            <div class="score"><span id="bhiScore">98.6</span><small> 分</small></div>
+        <div class="holo-stage">
+          <div class="holo-video-frame">
+            <video class="dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video>
+            <div class="video-caption"><i class="fa fa-video-camera"></i> 数字孪生主屏 · 全景视频</div>
           </div>
-          <div id="bhiState" class="bhi-state"><i class="fa fa-circle"></i> 安全运行</div>
-        </div>
-        <div class="bhi-grid">
-          <div class="bhi-item"><b><span id="bhiVibDot" class="ok">●</span> 振动</b><div id="bhiVib" class="val">0.18 mm/s · 正常</div></div>
-          <div class="bhi-item"><b><span id="bhiCrackDot" class="ok">●</span> 裂缝</b><div id="bhiCrack" class="val">0.02 mm · 正常</div></div>
-          <div class="bhi-item"><b><span id="bhiTiltDot" class="ok">●</span> 倾角</b><div id="bhiTilt" class="val">0.04° · 正常</div></div>
-          <div class="bhi-item"><b><span id="bhiDispDot" class="ok">●</span> 位移</b><div id="bhiDisp" class="val">0.3 mm · 正常</div></div>
-          <div class="bhi-item"><b><span id="bhiHumDot" class="ok">●</span> 温湿度</b><div id="bhiHum" class="val">22℃ / 58% · 正常</div></div>
+          <aside class="bhi-panel">
+            <div class="bhi-head">
+              <div>
+                <div class="label"><i class="fa fa-heartbeat"></i> 建筑健康指数 Building Health Index</div>
+                <div class="score"><span id="bhiScore">98.6</span><small> 分</small></div>
+              </div>
+              <div id="bhiState" class="bhi-state"><i class="fa fa-circle"></i> 安全运行</div>
+            </div>
+            <div class="bhi-grid">
+              <div class="bhi-item"><b><span id="bhiVibDot" class="ok">●</span> 振动</b><div id="bhiVib" class="val">0.18 mm/s · 正常</div></div>
+              <div class="bhi-item"><b><span id="bhiCrackDot" class="ok">●</span> 裂缝</b><div id="bhiCrack" class="val">0.02 mm · 正常</div></div>
+              <div class="bhi-item"><b><span id="bhiTiltDot" class="ok">●</span> 倾角</b><div id="bhiTilt" class="val">0.04° · 正常</div></div>
+              <div class="bhi-item"><b><span id="bhiDispDot" class="ok">●</span> 位移</b><div id="bhiDisp" class="val">0.3 mm · 正常</div></div>
+              <div class="bhi-item"><b><span id="bhiHumDot" class="ok">●</span> 温湿度</b><div id="bhiHum" class="val">22℃ / 58% · 正常</div></div>
+            </div>
+          </aside>
         </div>
       </div>
       <div class="float l1"><div class="t">装配率</div><div class="v">95%</div><div class="s">高装配率建造</div></div>
@@ -112,7 +88,7 @@
           <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim)">缩尺模型与现场孪生联动，说明剪力墙吊装、节点连接与基层处理的现场状态。</p></div>
           <span class="badge cyan">现场孪生</span>
         </div>
-        <div class="scene-img" style="margin-top:12px;height:150px">
+        <div class="scene-img media-frame" style="margin-top:12px">
           <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-2.mp4"></video>
           <div class="video-caption"><i class="fa fa-video-camera"></i> 第二段视频 · 施工实景</div>
         </div>
@@ -146,7 +122,7 @@
         <div style="display:flex;justify-content:space-between"><div style="font-size:16px;font-weight:800">装配式建造 · 指挥态势墙</div><span class="badge cyan">实景联动</span></div>
         <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">把剪力墙吊装、节点连接、基层处理与环境监测做成可互动的施工指挥面板。</p>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <div class="scene-img" style="flex:1;min-width:240px;height:180px">
+          <div class="scene-img media-frame" style="flex:1;min-width:340px">
             <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-1.mp4"></video>
             <div class="video-caption"><i class="fa fa-video-camera"></i> 第一段视频 · 指挥态势墙</div>
           </div>
