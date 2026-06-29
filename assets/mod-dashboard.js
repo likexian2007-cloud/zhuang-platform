@@ -16,6 +16,20 @@
       <a class="card seq" data-go="trace"><span class="no">06 一码溯源</span><h4>质量闭环</h4><p>数字身份证 → 工序留痕 → 扫码追溯。</p></a>
     </div>
 
+    <div class="ai-command-strip">
+      <div class="ai-command-main">
+        <span class="badge cyan"><i class="fa fa-magic"></i> AI智慧平台</span>
+        <b>AI总控正在联动：施工准入、传感器波形、整改派单、一码溯源</b>
+        <p>把现场数据转成“能不能吊、哪里有风险、派给谁整改、如何复检销项”的可执行结论。</p>
+      </div>
+      <div class="ai-agent-grid">
+        <div><span>AI施工裁判</span><b id="aiAgentJudge">准吊</b></div>
+        <div><span>AI波形研判</span><b id="aiAgentWave">低噪声</b></div>
+        <div><span>AI整改闭环</span><b>待命</b></div>
+        <div><span>AI溯源助手</span><b>在线</b></div>
+      </div>
+    </div>
+
     <div class="holo" id="holo">
       <div class="gridfloor"></div>
       <div class="title">
@@ -52,6 +66,63 @@
       <div class="float r1"><div class="t">质量合格率</div><div class="v" id="fRate">--</div><div class="s">质量监测看板</div></div>
       <div class="float r2"><div class="t">风速 · 作业条件</div><div class="v" id="fWind">0.2 m/s</div><div class="s" id="fWindOk">符合吊装条件</div></div>
       <div class="float r3"><div class="t">超差报警阈值</div><div class="v">10 mm</div><div class="s">同组差值自动报警</div></div>
+    </div>
+
+    <div class="demo-route">
+      <div class="route-head">
+        <div><b><i class="fa fa-map-signs"></i> 今日评委演示路线</b><p>按台词节奏自动串联：痛点说明 → 智能准入 → 试吊监测 → AI裁判 → 闭环溯源。</p></div>
+        <button id="btnDemoRoute" class="btn btn-cyan btn-sm"><i class="fa fa-play-circle"></i> 开始答辩演示</button>
+      </div>
+      <div class="route-steps" id="routeSteps">
+        <button class="on" data-route="0">1 项目痛点</button>
+        <button data-route="1">2 三确认准入</button>
+        <button data-route="2">3 试吊监测</button>
+        <button data-route="3">4 AI施工裁判</button>
+        <button data-route="4">5 整改溯源</button>
+      </div>
+      <div id="routeNarration" class="route-narration">当前讲解：装配式乡村住宅施工需要解决协同难、数据慢、定位偏差和质量追溯弱的问题。</div>
+    </div>
+
+    <div class="cols3 dashboard-innovations">
+      <div class="card judge-card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div style="font-size:16px;font-weight:800">AI施工裁判系统</div>
+          <span id="judgeBadge" class="badge green">准予吊装</span>
+        </div>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">把台词里的施工标准转成自动判定：风速、试吊、钢筋、凿毛、安全距离、人员到位同步过审。</p>
+        <div class="judge-grid">
+          <div><span>试吊高度</span><b id="judgeLift">300 mm</b><em>停顿 3s</em></div>
+          <div><span>风速</span><b id="judgeWind">0.4 m/s</b><em><6 m/s</em></div>
+          <div><span>安全距离</span><b>1.5H</b><em>警戒线到位</em></div>
+          <div><span>钢筋外露</span><b>≥8d</b><em>套筒通透</em></div>
+          <div><span>凿毛质量</span><b>3mm/80%</b><em>基层合格</em></div>
+          <div><span>AI结论</span><b id="judgeVerdict">允许进入吊装作业</b><em>自动生成依据</em></div>
+        </div>
+      </div>
+      <div class="card gate-card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div style="font-size:16px;font-weight:800">三确认一复核两到位 · 智能闸机</div>
+          <span id="gateBadge" class="badge green">6/6 通过</span>
+        </div>
+        <div class="gate-list">
+          <label><input type="checkbox" checked data-gate="环境确认"> 环境确认</label>
+          <label><input type="checkbox" checked data-gate="设备确认"> 设备确认</label>
+          <label><input type="checkbox" checked data-gate="构件确认"> 构件确认</label>
+          <label><input type="checkbox" checked data-gate="方案复核"> 方案复核</label>
+          <label><input type="checkbox" checked data-gate="安全交底到位"> 安全交底到位</label>
+          <label><input type="checkbox" checked data-gate="责任分工到位"> 责任分工到位</label>
+        </div>
+        <div id="gateResult" class="gate-result">所有准入条件满足，平台放行吊装作业。</div>
+      </div>
+      <div class="card ai-brief-card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div style="font-size:16px;font-weight:800">AI总控大脑 · 答辩摘要</div>
+          <span id="briefBadge" class="badge cyan">可生成</span>
+        </div>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">一键把当前平台状态整理成评委能听懂的“创新闭环说明”。</p>
+        <div id="aiBrief" class="ai-report compact">等待生成：将汇总 BHI、LSI、AI裁判、智能闸机、二维码溯源与低碳价值。</div>
+        <button id="btnAiBrief" class="btn btn-cyan btn-sm" style="margin-top:10px"><i class="fa fa-magic"></i> 生成答辩摘要</button>
+      </div>
     </div>
 
     <div class="cols2">
@@ -125,25 +196,32 @@
           <div class="vib-console" id="vibConsole" style="flex:1;min-width:340px">
             <div class="vib-head">
               <div>
-                <b><i class="fa fa-line-chart"></i> 震动传感器 · 实时曲线</b>
-                <p>参考设计赛道结构监测效果，模拟两人配合触发构件震动峰值。</p>
+                <b><i class="fa fa-line-chart"></i> 吊装稳定性监测 · 三轴加速度</b>
+                <p>点位：剪力墙吊点附近 MEMS 加速度计 · 采样 50Hz · 低通滤波 8Hz。</p>
               </div>
               <span id="vibStatus" class="badge green">正常波动</span>
             </div>
+            <div class="lsi-strip">
+              <div><span>LSI吊装稳定性指数</span><b id="lsiScore">96.8</b><em>分</em></div>
+              <div><span>传感器状态</span><b id="sensorMode">待机/微振</b><em>实时</em></div>
+              <div><span>AI波形结论</span><b id="waveLabel">低噪声稳定</b><em>自动研判</em></div>
+            </div>
             <div class="vib-canvas-wrap">
               <canvas id="vibCurve" width="720" height="320" aria-label="三轴振动曲线"></canvas>
-              <div class="vib-threshold">5 mm/s² 警戒线</div>
+              <div class="vib-threshold">0.50 m/s² 警戒线</div>
             </div>
             <div class="vib-readouts">
-              <div><span>X轴</span><b id="vibX">0.82</b><em>mm/s²</em></div>
-              <div><span>Y轴</span><b id="vibY">0.64</b><em>mm/s²</em></div>
-              <div><span>Z轴</span><b id="vibZ">0.91</b><em>mm/s²</em></div>
-              <div><span>峰值</span><b id="vibPeak">0.91</b><em>mm/s²</em></div>
+              <div><span>X轴</span><b id="vibX">0.082</b><em>m/s²</em></div>
+              <div><span>Y轴</span><b id="vibY">0.064</b><em>m/s²</em></div>
+              <div><span>Z轴</span><b id="vibZ">0.091</b><em>m/s²</em></div>
+              <div><span>峰值</span><b id="vibPeak">0.091</b><em>m/s²</em></div>
             </div>
             <div class="vib-actions">
-              <button id="btnVibHit" class="btn btn-cyan btn-sm" onclick="window.__prefabVibPulse=6.2"><i class="fa fa-bolt"></i> 模拟双人配合震动</button>
+              <button id="btnVibHit" class="btn btn-cyan btn-sm" onclick="window.__prefabVibPulse=.72"><i class="fa fa-bolt"></i> 模拟双人配合震动</button>
               <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 自动播放曲线</button>
+              <button id="btnWaveAI" class="btn btn-ghost btn-sm"><i class="fa fa-magic"></i> AI研判波形</button>
             </div>
+            <div id="waveReport" class="wave-report">正常微振：曲线幅值低、无持续上升趋势，符合试吊前稳定状态。</div>
           </div>
           <div style="flex:1;min-width:200px">
             <div class="focus" style="padding:10px"><div><b style="font-size:13px">墙体吊装闭合</b><p>高空吊装、节点焊缝、临边防护与传感器布点。</p></div></div>
@@ -204,15 +282,24 @@
         t: 0,
         auto: true,
         spike: 0,
-        points: Array.from({ length: 96 }, () => ({ x: 0.6, y: 0.5, z: 0.7 })),
+        drift: 0,
+        holdPeak: 0,
+        holdUntil: 0,
+        points: Array.from({ length: 120 }, () => ({ x: 0.055, y: 0.043, z: 0.061 })),
       });
       const xNode = el.querySelector("#vibX");
       const yNode = el.querySelector("#vibY");
       const zNode = el.querySelector("#vibZ");
       const peakNode = el.querySelector("#vibPeak");
       const status = el.querySelector("#vibStatus");
+      const aiAgentWave = el.querySelector("#aiAgentWave");
       const autoBtn = el.querySelector("#btnVibAuto");
       const hitBtn = el.querySelector("#btnVibHit");
+      const aiBtn = el.querySelector("#btnWaveAI");
+      const report = el.querySelector("#waveReport");
+      const lsiNode = el.querySelector("#lsiScore");
+      const modeNode = el.querySelector("#sensorMode");
+      const labelNode = el.querySelector("#waveLabel");
       const resize = () => {
         const r = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
@@ -243,21 +330,32 @@
             window.__prefabVibPulse = 0;
           }
           const pulse = state.spike;
-          const x = clamp(0.72 + Math.sin(state.t * 1.7) * 0.22 + Math.random() * 0.18 + pulse * 0.82, 0, 7.8);
-          const y = clamp(0.54 + Math.cos(state.t * 1.3) * 0.18 + Math.random() * 0.16 + pulse * 0.63, 0, 7.2);
-          const z = clamp(0.88 + Math.sin(state.t * 2.1 + 1.2) * 0.26 + Math.random() * 0.20 + pulse * 0.96, 0, 8.4);
-          state.spike = Math.max(0, state.spike * 0.985 - 0.005);
+          state.drift = clamp(state.drift + (Math.random() - 0.5) * 0.002, -0.018, 0.018);
+          const micro = () => (Math.random() - 0.5) * 0.012;
+          const damping = pulse ? Math.exp(-Math.max(0, 0.75 - pulse) * 1.5) : 0;
+          const x = clamp(0.055 + state.drift + Math.sin(state.t * 2.7) * 0.018 + micro() + pulse * 0.58 + damping * 0.05, 0, 0.95);
+          const y = clamp(0.043 + state.drift * 0.6 + Math.cos(state.t * 2.1) * 0.015 + micro() + pulse * 0.42 + damping * 0.04, 0, 0.90);
+          const z = clamp(0.061 + state.drift * 0.8 + Math.sin(state.t * 3.2 + 1.1) * 0.021 + micro() + pulse * 0.68 + damping * 0.06, 0, 1.05);
+          state.spike = Math.max(0, state.spike * 0.955 - 0.006);
           state.points.push({ x, y, z });
-          state.points = state.points.slice(-96);
+          state.points = state.points.slice(-120);
           const peak = Math.max(x, y, z);
-          if (xNode) xNode.textContent = x.toFixed(2);
-          if (yNode) yNode.textContent = y.toFixed(2);
-          if (zNode) zNode.textContent = z.toFixed(2);
-          if (peakNode) peakNode.textContent = peak.toFixed(2);
+          const eventPeak = Date.now() < state.holdUntil ? Math.max(peak, state.holdPeak) : peak;
+          const lsi = clamp(99.2 - eventPeak * 58 - Math.max(0, wind - 4) * 2.2, 62, 99.2);
+          const waveText = eventPeak >= 0.5 ? "冲击峰值" : eventPeak >= 0.28 ? "试吊扰动" : "低噪声稳定";
+          if (xNode) xNode.textContent = x.toFixed(3);
+          if (yNode) yNode.textContent = y.toFixed(3);
+          if (zNode) zNode.textContent = z.toFixed(3);
+          if (peakNode) peakNode.textContent = eventPeak.toFixed(3);
+          if (lsiNode) lsiNode.textContent = lsi.toFixed(1);
+          if (modeNode) modeNode.textContent = eventPeak >= 0.5 ? "冲击/复核" : eventPeak >= 0.28 ? "试吊扰动" : "待机/微振";
+          if (labelNode) labelNode.textContent = waveText;
+          if (aiAgentWave) aiAgentWave.textContent = eventPeak >= 0.5 ? "冲击预警" : eventPeak >= 0.28 ? "试吊扰动" : "低噪声";
           if (status) {
-            status.className = "badge " + (peak >= 5 ? "red" : peak >= 3.2 ? "amber" : "green");
-            status.textContent = peak >= 5 ? "超过警戒" : peak >= 3.2 ? "持续关注" : "正常波动";
+            status.className = "badge " + (eventPeak >= 0.5 ? "red" : eventPeak >= 0.28 ? "amber" : "green");
+            status.textContent = eventPeak >= 0.5 ? "超过警戒" : eventPeak >= 0.28 ? "持续关注" : "正常波动";
           }
+          this._vibSnapshot = { x, y, z, peak: eventPeak, lsi, waveText };
         }
         const w = canvas.clientWidth || 640;
         const h = canvas.clientHeight || 360;
@@ -283,8 +381,8 @@
           ctx.lineTo(x, h);
           ctx.stroke();
         }
-        const maxV = 8;
-        const thresholdY = h - (5 / maxV) * (h - 24) - 12;
+        const maxV = 1.0;
+        const thresholdY = h - (0.5 / maxV) * (h - 24) - 12;
         ctx.setLineDash([7, 6]);
         ctx.strokeStyle = "rgba(251,191,36,.8)";
         ctx.beginPath();
@@ -307,15 +405,24 @@
       window.addEventListener("resize", resize);
       resize();
       if (hitBtn) hitBtn.addEventListener("click", () => {
-        state.spike = Math.max(state.spike, 6.2);
-        const impact = { x: 5.72 + Math.random() * 0.35, y: 4.88 + Math.random() * 0.45, z: 6.18 + Math.random() * 0.42 };
+        state.spike = Math.max(state.spike, 0.72);
+        const impact = { x: 0.58 + Math.random() * 0.05, y: 0.43 + Math.random() * 0.06, z: 0.68 + Math.random() * 0.07 };
         state.points.push(impact);
-        state.points = state.points.slice(-96);
-        if (xNode) xNode.textContent = impact.x.toFixed(2);
-        if (yNode) yNode.textContent = impact.y.toFixed(2);
-        if (zNode) zNode.textContent = impact.z.toFixed(2);
-        if (peakNode) peakNode.textContent = Math.max(impact.x, impact.y, impact.z).toFixed(2);
+        state.points = state.points.slice(-120);
+        const peak = Math.max(impact.x, impact.y, impact.z);
+        state.holdPeak = peak;
+        state.holdUntil = Date.now() + 8000;
+        const lsi = clamp(99.2 - peak * 58 - Math.max(0, wind - 4) * 2.2, 62, 99.2);
+        if (xNode) xNode.textContent = impact.x.toFixed(3);
+        if (yNode) yNode.textContent = impact.y.toFixed(3);
+        if (zNode) zNode.textContent = impact.z.toFixed(3);
+        if (peakNode) peakNode.textContent = peak.toFixed(3);
+        if (lsiNode) lsiNode.textContent = lsi.toFixed(1);
+        if (modeNode) modeNode.textContent = "冲击/复核";
+        if (labelNode) labelNode.textContent = "冲击峰值";
+        if (aiAgentWave) aiAgentWave.textContent = "冲击预警";
         if (status) { status.className = "badge red"; status.textContent = "超过警戒"; }
+        this._vibSnapshot = { ...impact, peak, lsi, waveText: "冲击峰值" };
         window.Platform.toast("已模拟双人配合产生震动峰值，传感器曲线进入预警区");
       });
       if (autoBtn) autoBtn.addEventListener("click", () => {
@@ -323,11 +430,101 @@
         autoBtn.classList.toggle("on", state.auto);
         autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 自动播放曲线' : '<i class="fa fa-pause"></i> 曲线已暂停';
       });
+      if (aiBtn) aiBtn.addEventListener("click", () => {
+        const d = this._vibSnapshot || { peak: 0.08, lsi: 96.8, waveText: "低噪声稳定" };
+        const msg = d.peak >= 0.5
+          ? `AI波形研判：峰值 ${d.peak.toFixed(3)} m/s²，超过0.50 m/s²警戒线，属于短时冲击波形。建议暂停起吊，复核牵引绳角度、吊点固定、人员配合节奏，重新进行300mm试吊并拍照归档。`
+          : d.peak >= 0.28
+            ? `AI波形研判：峰值 ${d.peak.toFixed(3)} m/s²，处于试吊扰动区。建议保持低速起升，观察3秒稳定性，确认构件无持续摆动后再进入正式吊装。`
+            : `AI波形研判：峰值 ${d.peak.toFixed(3)} m/s²，曲线呈低噪声微振，无持续放大趋势。LSI ${d.lsi.toFixed(1)}分，满足试吊前稳定状态。`;
+        if (report) report.textContent = msg;
+      });
       requestAnimationFrame(render);
     };
     initVibrationCurve();
+    const routeTexts = [
+      "当前讲解：装配式乡村住宅施工需要解决协同难、数据慢、定位偏差和质量追溯弱的问题。",
+      "当前讲解：三确认、一复核、两到位全部通过后，智能闸机才允许进入吊装作业。",
+      "当前讲解：300mm试吊停顿3秒，同时读取三轴加速度曲线和LSI吊装稳定性指数。",
+      "当前讲解：AI施工裁判把风速、试吊、凿毛、钢筋外露、安全距离转成可解释判定。",
+      "当前讲解：异常会进入AI闭环中心形成整改工单，并通过一码溯源绑定到构件数字身份证。",
+    ];
+    const activateRoute = (idx) => {
+      el.querySelectorAll("[data-route]").forEach((b) => b.classList.toggle("on", Number(b.dataset.route) === idx));
+      const n = el.querySelector("#routeNarration");
+      if (n) n.textContent = routeTexts[idx] || routeTexts[0];
+    };
+    if (!this._innovationReady) {
+      el.querySelectorAll("[data-route]").forEach((btn) => btn.addEventListener("click", () => activateRoute(Number(btn.dataset.route))));
+      const demoBtn = el.querySelector("#btnDemoRoute");
+      if (demoBtn) demoBtn.addEventListener("click", () => {
+        let i = 0;
+        clearInterval(this._routePlay);
+        activateRoute(0);
+        this._routePlay = setInterval(() => {
+          i += 1;
+          if (i >= routeTexts.length) { clearInterval(this._routePlay); return; }
+          activateRoute(i);
+        }, 1800);
+      });
+      const refreshGate = () => {
+        const checks = Array.from(el.querySelectorAll("[data-gate]"));
+        const ok = checks.filter((c) => c.checked).length;
+        const badge = el.querySelector("#gateBadge");
+        const result = el.querySelector("#gateResult");
+        if (badge) {
+          badge.className = "badge " + (ok === checks.length ? "green" : ok >= 4 ? "amber" : "red");
+          badge.textContent = `${ok}/${checks.length} 通过`;
+        }
+        if (result) {
+          const missing = checks.filter((c) => !c.checked).map((c) => c.dataset.gate);
+          result.textContent = missing.length ? `暂不放行：${missing.join("、")}未完成，AI已建议生成整改/补交底任务。` : "所有准入条件满足，平台放行吊装作业。";
+        }
+      };
+      el.querySelectorAll("[data-gate]").forEach((c) => c.addEventListener("change", refreshGate));
+      refreshGate();
+      const briefBtn = el.querySelector("#btnAiBrief");
+      if (briefBtn) briefBtn.addEventListener("click", async () => {
+        const out = el.querySelector("#aiBrief");
+        const badge = el.querySelector("#briefBadge");
+        const snap = this._bhiSnapshot || { score: "98.6", state: "安全运行" };
+        const vib = this._vibSnapshot || { peak: 0.08, lsi: 96.8, waveText: "低噪声稳定" };
+        if (out) { out.classList.add("loading"); out.textContent = "AI总控正在生成答辩摘要..."; }
+        if (badge) { badge.className = "badge amber"; badge.textContent = "生成中"; }
+        const local = `【答辩摘要】平台围绕“规范筑基、数字提效”形成施工前智能准入、施工中AI裁判、施工后整改溯源、运维期BHI健康监测闭环。当前BHI ${snap.score}分，${snap.state}；LSI ${vib.lsi.toFixed ? vib.lsi.toFixed(1) : vib.lsi}分，波形判定为${vib.waveText}。创新点包括三确认一复核两到位智能闸机、图纸AI核对、吊装稳定性指数、一码一构件全生命周期档案。`;
+        try {
+          if (!(await AI.available())) throw new Error("AI 后端暂不可用");
+          const reply = await AI.chat([
+            { role: "system", content: "你是装配式施工大赛答辩总控，请把平台能力总结成180字内评委能听懂的创新亮点，语言要专业、有冲击力。" },
+            { role: "user", content: JSON.stringify({ BHI: snap, vibration: vib, gate: "三确认一复核两到位", judge: "AI施工裁判", trace: "一码溯源" }, null, 2) },
+          ], { max_tokens: 460, temperature: 0.35 });
+          if (out) out.textContent = reply || local;
+        } catch (e) {
+          if (out) out.textContent = local + `\n\n（AI暂不可用，已使用本地总控摘要。）`;
+        } finally {
+          if (out) out.classList.remove("loading");
+          if (badge) { badge.className = "badge green"; badge.textContent = "已生成"; }
+        }
+      });
+      this._innovationReady = true;
+    }
+    const updateJudge = (windValue) => {
+      const vib = this._vibSnapshot || { peak: 0.08, lsi: 96.8 };
+      const pass = windValue < 6 && vib.peak < 0.5;
+      const badge = el.querySelector("#judgeBadge");
+      const aiAgentJudge = el.querySelector("#aiAgentJudge");
+      if (badge) {
+        badge.className = "badge " + (pass ? "green" : "red");
+        badge.textContent = pass ? "准予吊装" : "暂停复核";
+      }
+      if (aiAgentJudge) aiAgentJudge.textContent = pass ? "准吊" : "立停";
+      setText("judgeWind", windValue.toFixed(1) + " m/s");
+      setText("judgeLift", "300 mm");
+      setText("judgeVerdict", pass ? "允许进入吊装作业" : "暂停作业，复核震动/风速");
+    };
     const updateBhi = () => {
       sensor.vib = clamp(sensor.vib + (Math.random() - 0.48) * 0.05, 0.08, 0.72);
+      if (this._vibSnapshot && this._vibSnapshot.peak >= 0.5) sensor.vib = clamp(Math.max(sensor.vib, this._vibSnapshot.peak * 0.92), 0.08, 0.72);
       sensor.crack = clamp(sensor.crack + (Math.random() - 0.5) * 0.006, 0.01, 0.18);
       sensor.tilt = clamp(sensor.tilt + (Math.random() - 0.5) * 0.012, 0.02, 0.28);
       sensor.disp = clamp(sensor.disp + (Math.random() - 0.5) * 0.16, 0.1, 2.8);
@@ -409,6 +606,7 @@
     }
     if (this._timer) return; // 只启动一次
     let wind = 0.4;
+    updateJudge(wind);
     this._timer = setInterval(() => {
       if (!el.classList.contains("active")) return; // 隐藏时不更新
       const w = el.querySelector("#fWind"), ok = el.querySelector("#fWindOk"), p = el.querySelector("#fPeople");
@@ -417,6 +615,7 @@
       if (w) w.textContent = wind.toFixed(1) + " m/s";
       if (ok) { ok.textContent = good ? "符合吊装条件" : "超限·立停报告"; ok.style.color = good ? "#6ee7b7" : "#fca5a5"; }
       if (p) p.textContent = (5 + (Math.random() > 0.7 ? 1 : 0)) + " 人";
+      updateJudge(wind);
       updateBhi();
     }, 2800);
   },

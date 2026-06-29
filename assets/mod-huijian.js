@@ -8,6 +8,19 @@
       <button data-view="quality">质量看板</button>
     </div>
 
+    <div class="mobile-workflow no-print">
+      <div>
+        <b><i class="fa fa-mobile"></i> 现场快录模式</b>
+        <span>扫码/拍照/关键尺寸优先，适合手机端施工员使用</span>
+      </div>
+      <div class="mobile-steps">
+        <button data-jump="#workstationNo"><i class="fa fa-id-card-o"></i><b>基础</b><span>工位与人员</span></button>
+        <button data-jump="#hL1"><i class="fa fa-arrows-v"></i><b>尺寸</b><span>三点实测</span></button>
+        <button data-jump="#btnAICheck"><i class="fa fa-magic"></i><b>AI核对</b><span>图纸比对</span></button>
+        <button data-jump="#btnGenQR"><i class="fa fa-qrcode"></i><b>归档</b><span>签名溯源</span></button>
+      </div>
+    </div>
+
     <div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <div style="font-weight:700"><i class="fa fa-tasks" style="color:var(--cyan)"></i> 双墙体吊装总进度（拍照 + 判定）</div>
       <div style="flex:1;min-width:200px"><div class="bar-wrap"><div id="progressBar" class="bar"></div></div></div>
@@ -146,6 +159,11 @@
       "20G367-2": { thickness: 140, exposed: 112, steel: "Φ14", sleeve: 6, ring: 120 },
       "_default": { thickness: 200, exposed: 120, steel: "Φ14", sleeve: 8, ring: 150 },
     };
+
+    root.querySelectorAll("[data-jump]").forEach((btn) => btn.addEventListener("click", () => {
+      const target = root.querySelector(btn.dataset.jump);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
 
     function buildWall(wall) { /* 与原版一致的检验表单 */
       return `
