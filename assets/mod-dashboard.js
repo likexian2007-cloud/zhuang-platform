@@ -25,7 +25,7 @@
       <div class="center">
         <div class="holo-stage">
           <div class="holo-video-frame">
-            <video class="dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video>
+            <video class="dash-video auto-video" controls autoplay muted loop preload="metadata" playsinline src="assets/media/prefab-monitor-3.mp4"></video>
             <div class="video-caption"><i class="fa fa-video-camera"></i> 数字孪生主屏 · 全景视频</div>
           </div>
           <aside class="bhi-panel">
@@ -89,7 +89,7 @@
           <span class="badge cyan">现场孪生</span>
         </div>
         <div class="scene-img media-frame" style="margin-top:12px">
-          <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-2.mp4"></video>
+          <video class="embedded-video dash-video auto-video" controls autoplay muted loop preload="metadata" playsinline src="assets/media/prefab-monitor-2.mp4"></video>
           <div class="video-caption"><i class="fa fa-video-camera"></i> 第二段视频 · 施工实景</div>
         </div>
         <div class="grid g3" style="margin-top:12px">
@@ -122,9 +122,28 @@
         <div style="display:flex;justify-content:space-between"><div style="font-size:16px;font-weight:800">装配式建造 · 指挥态势墙</div><span class="badge cyan">实景联动</span></div>
         <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">把剪力墙吊装、节点连接、基层处理与环境监测做成可互动的施工指挥面板。</p>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <div class="scene-img media-frame" style="flex:1;min-width:340px">
-            <video class="embedded-video dash-video" controls preload="metadata" playsinline src="assets/media/prefab-monitor-1.mp4"></video>
-            <div class="video-caption"><i class="fa fa-video-camera"></i> 第一段视频 · 指挥态势墙</div>
+          <div class="vib-console" id="vibConsole" style="flex:1;min-width:340px">
+            <div class="vib-head">
+              <div>
+                <b><i class="fa fa-line-chart"></i> 震动传感器 · 实时曲线</b>
+                <p>参考设计赛道结构监测效果，模拟两人配合触发构件震动峰值。</p>
+              </div>
+              <span id="vibStatus" class="badge green">正常波动</span>
+            </div>
+            <div class="vib-canvas-wrap">
+              <canvas id="vibCurve" width="720" height="320" aria-label="三轴振动曲线"></canvas>
+              <div class="vib-threshold">5 mm/s² 警戒线</div>
+            </div>
+            <div class="vib-readouts">
+              <div><span>X轴</span><b id="vibX">0.82</b><em>mm/s²</em></div>
+              <div><span>Y轴</span><b id="vibY">0.64</b><em>mm/s²</em></div>
+              <div><span>Z轴</span><b id="vibZ">0.91</b><em>mm/s²</em></div>
+              <div><span>峰值</span><b id="vibPeak">0.91</b><em>mm/s²</em></div>
+            </div>
+            <div class="vib-actions">
+              <button id="btnVibHit" class="btn btn-cyan btn-sm" onclick="window.__prefabVibPulse=6.2"><i class="fa fa-bolt"></i> 模拟双人配合震动</button>
+              <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 自动播放曲线</button>
+            </div>
           </div>
           <div style="flex:1;min-width:200px">
             <div class="focus" style="padding:10px"><div><b style="font-size:13px">墙体吊装闭合</b><p>高空吊装、节点焊缝、临边防护与传感器布点。</p></div></div>
@@ -153,14 +172,11 @@
     const { $, Store, AI } = window.Platform;
     // 合格率
     Store.stats().then((s) => { const e = el.querySelector("#fRate"); if (e) e.textContent = (s.total ? Math.round((s.qualified / s.total) * 100) : 100) + "%"; }).catch(() => {});
-    if (!this._videoReady) {
-      el.querySelectorAll("video").forEach((v) => {
-        v.addEventListener("play", () => {
-          el.querySelectorAll("video").forEach((other) => { if (other !== v) other.pause(); });
-        });
-      });
-      this._videoReady = true;
-    }
+    el.querySelectorAll(".auto-video").forEach((v) => {
+      v.muted = true;
+      v.loop = true;
+      v.play().catch(() => {});
+    });
     const setText = (id, text) => { const n = el.querySelector("#" + id); if (n) n.textContent = text; };
     const setDot = (id, level) => {
       const n = el.querySelector("#" + id);
@@ -179,6 +195,137 @@
       if (!weak.length) return `【安全运行】BHI ${d.score} 分。振动、裂缝、倾角、位移及温湿度均处于正常区间，建议保持 24h 自动巡检、每周生成一次运维健康报告，并将数据同步到一码溯源档案。`;
       return `【持续关注】BHI ${d.score} 分。重点关注：${weak.join("、")}。建议提高采样频率，复核对应构件节点和传感器安装状态，形成“预警-派单-复核-销项”闭环。`;
     };
+    const initVibrationCurve = () => {
+      const canvas = el.querySelector("#vibCurve");
+      if (!canvas || canvas.dataset.ready) return;
+      canvas.dataset.ready = "1";
+      const ctx = canvas.getContext("2d");
+      const state = this._vibState || (this._vibState = {
+        t: 0,
+        auto: true,
+        spike: 0,
+        points: Array.from({ length: 96 }, () => ({ x: 0.6, y: 0.5, z: 0.7 })),
+      });
+      const xNode = el.querySelector("#vibX");
+      const yNode = el.querySelector("#vibY");
+      const zNode = el.querySelector("#vibZ");
+      const peakNode = el.querySelector("#vibPeak");
+      const status = el.querySelector("#vibStatus");
+      const autoBtn = el.querySelector("#btnVibAuto");
+      const hitBtn = el.querySelector("#btnVibHit");
+      const resize = () => {
+        const r = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(360, Math.round(r.width * dpr));
+        canvas.height = Math.max(210, Math.round(r.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+      const drawLine = (pts, key, color, w, h, maxV) => {
+        ctx.beginPath();
+        pts.forEach((p, i) => {
+          const x = (i / (pts.length - 1)) * w;
+          const y = h - (p[key] / maxV) * (h - 24) - 12;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      };
+      const render = () => {
+        if (el.classList.contains("active") && state.auto) {
+          state.t += 0.12;
+          if (window.__prefabVibPulse) {
+            state.spike = Math.max(state.spike, window.__prefabVibPulse);
+            window.__prefabVibPulse = 0;
+          }
+          const pulse = state.spike;
+          const x = clamp(0.72 + Math.sin(state.t * 1.7) * 0.22 + Math.random() * 0.18 + pulse * 0.82, 0, 7.8);
+          const y = clamp(0.54 + Math.cos(state.t * 1.3) * 0.18 + Math.random() * 0.16 + pulse * 0.63, 0, 7.2);
+          const z = clamp(0.88 + Math.sin(state.t * 2.1 + 1.2) * 0.26 + Math.random() * 0.20 + pulse * 0.96, 0, 8.4);
+          state.spike = Math.max(0, state.spike * 0.985 - 0.005);
+          state.points.push({ x, y, z });
+          state.points = state.points.slice(-96);
+          const peak = Math.max(x, y, z);
+          if (xNode) xNode.textContent = x.toFixed(2);
+          if (yNode) yNode.textContent = y.toFixed(2);
+          if (zNode) zNode.textContent = z.toFixed(2);
+          if (peakNode) peakNode.textContent = peak.toFixed(2);
+          if (status) {
+            status.className = "badge " + (peak >= 5 ? "red" : peak >= 3.2 ? "amber" : "green");
+            status.textContent = peak >= 5 ? "超过警戒" : peak >= 3.2 ? "持续关注" : "正常波动";
+          }
+        }
+        const w = canvas.clientWidth || 640;
+        const h = canvas.clientHeight || 360;
+        ctx.clearRect(0, 0, w, h);
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, "rgba(14,165,233,.15)");
+        grad.addColorStop(1, "rgba(2,6,23,.02)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = "rgba(148,163,184,.12)";
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 6; i++) {
+          const y = (h / 6) * i;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+        for (let i = 1; i < 8; i++) {
+          const x = (w / 8) * i;
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+        const maxV = 8;
+        const thresholdY = h - (5 / maxV) * (h - 24) - 12;
+        ctx.setLineDash([7, 6]);
+        ctx.strokeStyle = "rgba(251,191,36,.8)";
+        ctx.beginPath();
+        ctx.moveTo(0, thresholdY);
+        ctx.lineTo(w, thresholdY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawLine(state.points, "x", "#22d3ee", w, h, maxV);
+        drawLine(state.points, "y", "#a78bfa", w, h, maxV);
+        drawLine(state.points, "z", "#34d399", w, h, maxV);
+        ctx.fillStyle = "rgba(219,234,254,.72)";
+        ctx.font = "12px sans-serif";
+        ctx.fillText("X轴", 12, 20);
+        ctx.fillStyle = "#a78bfa";
+        ctx.fillText("Y轴", 50, 20);
+        ctx.fillStyle = "#34d399";
+        ctx.fillText("Z轴", 88, 20);
+        requestAnimationFrame(render);
+      };
+      window.addEventListener("resize", resize);
+      resize();
+      if (hitBtn) hitBtn.addEventListener("click", () => {
+        state.spike = Math.max(state.spike, 6.2);
+        const impact = { x: 5.72 + Math.random() * 0.35, y: 4.88 + Math.random() * 0.45, z: 6.18 + Math.random() * 0.42 };
+        state.points.push(impact);
+        state.points = state.points.slice(-96);
+        if (xNode) xNode.textContent = impact.x.toFixed(2);
+        if (yNode) yNode.textContent = impact.y.toFixed(2);
+        if (zNode) zNode.textContent = impact.z.toFixed(2);
+        if (peakNode) peakNode.textContent = Math.max(impact.x, impact.y, impact.z).toFixed(2);
+        if (status) { status.className = "badge red"; status.textContent = "超过警戒"; }
+        window.Platform.toast("已模拟双人配合产生震动峰值，传感器曲线进入预警区");
+      });
+      if (autoBtn) autoBtn.addEventListener("click", () => {
+        state.auto = !state.auto;
+        autoBtn.classList.toggle("on", state.auto);
+        autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 自动播放曲线' : '<i class="fa fa-pause"></i> 曲线已暂停';
+      });
+      requestAnimationFrame(render);
+    };
+    initVibrationCurve();
     const updateBhi = () => {
       sensor.vib = clamp(sensor.vib + (Math.random() - 0.48) * 0.05, 0.08, 0.72);
       sensor.crack = clamp(sensor.crack + (Math.random() - 0.5) * 0.006, 0.01, 0.18);
