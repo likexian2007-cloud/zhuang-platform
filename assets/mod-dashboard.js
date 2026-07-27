@@ -203,7 +203,7 @@
             </div>
             <div class="lsi-strip">
               <div><span>LSI吊装稳定性指数</span><b id="lsiScore">96.8</b><em>分</em></div>
-              <div><span>传感器状态</span><b id="sensorMode">待机/微振</b><em>实时</em></div>
+              <div><span>数据来源</span><b id="sensorMode">演示数据</b><em>接口待接入</em></div>
               <div><span>AI波形结论</span><b id="waveLabel">低噪声稳定</b><em>自动研判</em></div>
             </div>
             <div class="vib-canvas-wrap">
@@ -217,8 +217,8 @@
               <div><span>峰值</span><b id="vibPeak">0.091</b><em>m/s²</em></div>
             </div>
             <div class="vib-actions">
-              <button id="btnVibHit" class="btn btn-cyan btn-sm" onclick="window.__prefabVibPulse=.72"><i class="fa fa-bolt"></i> 模拟双人配合震动</button>
-              <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 自动播放曲线</button>
+              <button id="btnVibHit" class="btn btn-cyan btn-sm"><i class="fa fa-folder-open-o"></i> 载入试吊冲击样本</button>
+              <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 连续采样演示</button>
               <button id="btnWaveAI" class="btn btn-ghost btn-sm"><i class="fa fa-magic"></i> AI研判波形</button>
             </div>
             <div id="waveReport" class="wave-report">正常微振：曲线幅值低、无持续上升趋势，符合试吊前稳定状态。</div>
@@ -241,7 +241,9 @@
         <div class="check"><div><b>PPT 五维度</b><p>总体思路·技能要点·项目创新·项目成果·应用价值</p></div><span class="badge green">已接入</span></div>
         <div class="check"><div><b>图纸AI核对</b><p>实测实量对照原始图纸，自动校对判定偏差</p></div><span class="badge cyan">新增</span></div>
         <div class="check"><div><b>装配慧检报警</b><p>超差 10mm 大框 + 警笛，红/黄/绿三级响应</p></div><span class="badge green">已接入</span></div>
+        <div class="check"><div><b>作业前人工检查</b><p>工具·材料·设备六项确认，异常处置随吊装记录归档</p></div><span class="badge cyan">新增</span></div>
         <div class="check"><div><b>人机料法环</b><p>人员·机械·材料·工法·环境全要素监控</p></div><span class="badge green">已接入</span></div>
+        <div class="check"><div><b>建筑废料分类台账</b><p>钢材·混凝土·木模板·包装材料按重量与去向追溯</p></div><span class="badge cyan">新增</span></div>
         <div class="check"><div><b>AI 数字人</b><p>按装配式技术标准指挥，问答即时预警</p></div><span class="badge cyan">可交互</span></div>
       </div>
     </div>`;
@@ -348,7 +350,7 @@
           if (zNode) zNode.textContent = z.toFixed(3);
           if (peakNode) peakNode.textContent = eventPeak.toFixed(3);
           if (lsiNode) lsiNode.textContent = lsi.toFixed(1);
-          if (modeNode) modeNode.textContent = eventPeak >= 0.5 ? "冲击/复核" : eventPeak >= 0.28 ? "试吊扰动" : "待机/微振";
+          if (modeNode) modeNode.textContent = eventPeak >= 0.5 ? "历史冲击样本" : "演示数据";
           if (labelNode) labelNode.textContent = waveText;
           if (aiAgentWave) aiAgentWave.textContent = eventPeak >= 0.5 ? "冲击预警" : eventPeak >= 0.28 ? "试吊扰动" : "低噪声";
           if (status) {
@@ -418,17 +420,17 @@
         if (zNode) zNode.textContent = impact.z.toFixed(3);
         if (peakNode) peakNode.textContent = peak.toFixed(3);
         if (lsiNode) lsiNode.textContent = lsi.toFixed(1);
-        if (modeNode) modeNode.textContent = "冲击/复核";
+        if (modeNode) modeNode.textContent = "历史冲击样本";
         if (labelNode) labelNode.textContent = "冲击峰值";
         if (aiAgentWave) aiAgentWave.textContent = "冲击预警";
         if (status) { status.className = "badge red"; status.textContent = "超过警戒"; }
         this._vibSnapshot = { ...impact, peak, lsi, waveText: "冲击峰值" };
-        window.Platform.toast("已模拟双人配合产生震动峰值，传感器曲线进入预警区");
+        window.Platform.toast("已载入一段试吊冲击样本，AI可对波形进行研判");
       });
       if (autoBtn) autoBtn.addEventListener("click", () => {
         state.auto = !state.auto;
         autoBtn.classList.toggle("on", state.auto);
-        autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 自动播放曲线' : '<i class="fa fa-pause"></i> 曲线已暂停';
+        autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 连续采样演示' : '<i class="fa fa-pause"></i> 曲线已暂停';
       });
       if (aiBtn) aiBtn.addEventListener("click", () => {
         const d = this._vibSnapshot || { peak: 0.08, lsi: 96.8, waveText: "低噪声稳定" };
