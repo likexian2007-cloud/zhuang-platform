@@ -53,6 +53,38 @@
           <ul id="aiList" style="margin-top:8px;padding-left:20px;font-size:13px;color:var(--text-dim)"></ul>
         </section>
 
+        <section class="card precheck-card" id="precheckCard" style="margin-bottom:16px">
+          <div class="precheck-head">
+            <div>
+              <div class="section-title" style="font-size:16px;margin:0"><span class="i"></span><i class="fa fa-check-square-o"></i> 作业前工具、材料与设备检查</div>
+              <p class="muted">由现场人员逐项确认。异常项将随吊装记录归档，并进入 AI 风险摘要。</p>
+            </div>
+            <span id="precheckBadge" class="badge amber">0/6 已确认</span>
+          </div>
+          <div class="precheck-grid" id="precheckGrid">
+            ${[
+              ["吊索具与钢丝绳", "磨损、断丝、变形及额定载荷"],
+              ["卸扣、吊钉与连接销", "锁止可靠、规格匹配、无裂纹"],
+              ["汽车吊及限位装置", "检验有效、支腿稳定、限位正常"],
+              ["激光定位器与水准仪", "校准有效、电量充足、读数稳定"],
+              ["斜支撑及临时固定件", "数量齐全、螺纹完好、无变形"],
+              ["灌浆料及连接材料", "批次可追溯、合格证齐全、未过期"],
+            ].map((item, index) => `<div class="precheck-item" data-check-index="${index}">
+              <div><b>${item[0]}</b><span>${item[1]}</span></div>
+              <div class="check-choice" role="group" aria-label="${item[0]}检查结果">
+                <button type="button" data-check-value="正常">正常</button>
+                <button type="button" data-check-value="异常">异常</button>
+              </div>
+            </div>`).join("")}
+          </div>
+          <div class="precheck-meta grid g3">
+            <label class="field"><span>检查人</span><input id="precheckInspector" placeholder="现场检查人" /></label>
+            <label class="field"><span>检查时间</span><input id="precheckTime" type="datetime-local" /></label>
+            <label class="field"><span>异常说明 / 处置</span><input id="precheckNote" placeholder="无异常可留空" /></label>
+          </div>
+          <div id="precheckSummary" class="wave-report">AI检查摘要：请先完成 6 项人工确认。</div>
+        </section>
+
         <div id="wallsMount"></div>
 
         <!-- 图纸导入 · AI 自动核对 -->
@@ -148,7 +180,7 @@
       { id: "fix", name: "固定安装完成后" }, { id: "rebar", name: "钢筋绑扎完成后" },
     ];
     const WALLS = [1, 2];
-    const state = { walls: {} };
+    const state = { walls: {}, prechecks: Array(6).fill(null) };
     WALLS.forEach((w) => { state.walls[w] = { steps: {} }; STEPS_PER_WALL.forEach((s) => (state.walls[w].steps[s.id] = { photos: [], pass: null, done: false })); });
     let aiEnabled = true, aiAlertCache = new Set(), recorderSig = null, lastSavedRecordId = null;
 
@@ -164,6 +196,34 @@
       const target = root.querySelector(btn.dataset.jump);
       if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
     }));
+
+    const precheckTime = $("precheckTime");
+    if (precheckTime) {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      precheckTime.value = d.toISOString().slice(0, 16);
+    }
+    function updatePrechecks() {
+      const done = state.prechecks.filter(Boolean).length;
+      const abnormal = state.prechecks.filter((x) => x === "异常").length;
+      const badge = $("precheckBadge");
+      badge.className = "badge " + (done < 6 ? "amber" : abnormal ? "red" : "green");
+      badge.textContent = `${done}/6 已确认${abnormal ? ` · ${abnormal}项异常` : ""}`;
+      $("precheckSummary").textContent = done < 6
+        ? `AI检查摘要：还有 ${6 - done} 项待确认，完成后再进入数据记录。`
+        : abnormal
+          ? `AI检查摘要：发现 ${abnormal} 项异常。建议暂停作业，隔离相关工具设备，完成更换或复检并填写处置说明后再申请吊装。`
+          : "AI检查摘要：工具、材料与设备 6 项人工检查全部正常，具备进入构件数据记录的前置条件。";
+    }
+    root.querySelectorAll("[data-check-value]").forEach((btn) => btn.addEventListener("click", () => {
+      const item = btn.closest("[data-check-index]");
+      const index = Number(item.dataset.checkIndex);
+      state.prechecks[index] = btn.dataset.checkValue;
+      item.querySelectorAll("[data-check-value]").forEach((b) => b.classList.toggle("on", b === btn));
+      item.classList.toggle("has-error", btn.dataset.checkValue === "异常");
+      updatePrechecks();
+    }));
+    updatePrechecks();
 
     function buildWall(wall) { /* 与原版一致的检验表单 */
       return `
@@ -579,7 +639,16 @@
     /* 收集/保存/上传/PDF/重置 */
     function collectFormData() {
       const require = (id, msg) => { const v = $(id).value.trim(); if (!v) throw new Error(msg); return v; };
-      const common = { workstationNo: require("workstationNo", "请填写工位号"), startTime: $("startTime").value, recorder: require("recorder", "请填写记录人"), crew: require("crew", "请填写施工人员信息"), signatures: { recorder: recorderSig }, meta: { uploadTime: now() } };
+      if (state.prechecks.some((x) => !x)) throw new Error("请先完成工具、材料与设备 6 项人工检查");
+      const inspection = {
+        results: state.prechecks.slice(),
+        inspector: require("precheckInspector", "请填写作业前检查人"),
+        checkedAt: $("precheckTime").value,
+        note: $("precheckNote").value.trim(),
+        abnormalCount: state.prechecks.filter((x) => x === "异常").length,
+      };
+      if (inspection.abnormalCount && !inspection.note) throw new Error("存在异常项，请填写异常说明或处置结果");
+      const common = { workstationNo: require("workstationNo", "请填写工位号"), startTime: $("startTime").value, recorder: require("recorder", "请填写记录人"), crew: require("crew", "请填写施工人员信息"), inspection, signatures: { recorder: recorderSig }, meta: { uploadTime: now() } };
       const walls = {};
       WALLS.forEach((wall) => { walls[wall] = { matchSession: require(`matchSession${wall}`, `请选择第${wall}面墙施工场地`), teamId: require(`teamId${wall}`, `请填写第${wall}面墙施工队伍`), componentType: require(`componentType${wall}`, `请选择第${wall}面墙构件类型`), drawingNo: require(`drawingNo${wall}`, `请选择第${wall}面墙图纸编号`), cid: require(`cid${wall}`, `请填写第${wall}面墙构件ID`), pid: require(`pid${wall}`, `请填写第${wall}面墙项目编号`), grid: $(`grid${wall}`).value.trim(), steps: JSON.parse(JSON.stringify(state.walls[wall].steps)), sleeveFailed: parseInt($(`sleeveFailed${wall}`).value || 0), sleeveTotal: parseInt($(`sleeveTotal${wall}`).value || 0), abnormal: { hasAbnormal: root.querySelector(`input[name="hasAbnormal${wall}"]:checked`).value, needChange: root.querySelector(`input[name="needChange${wall}"]:checked`).value, desc: $(`abnormalDesc${wall}`).value.trim() } }; });
       if (!recorderSig) throw new Error('请完成记录人签名并点击"保存签名"');
@@ -590,6 +659,7 @@
       try {
         const d = collectFormData(); let passRate = 100;
         WALLS.forEach((wall) => { const total = parseInt($(`sleeveTotal${wall}`).value || 0), failed = parseInt($(`sleeveFailed${wall}`).value || 0); if (total > 0 && failed > 0) passRate -= Math.min(15, Math.round((failed / total) * 15)); STEPS_PER_WALL.forEach((s) => { if (!d.walls[wall].steps[s.id].done) passRate -= 3; if (d.walls[wall].steps[s.id].pass === false) passRate -= 5; }); });
+        passRate -= d.inspection.abnormalCount * 8;
         d.passRate = Math.max(0, Math.min(100, Math.round(passRate))); d.status = d.passRate >= 90 ? "合格" : d.passRate >= 70 ? "预警" : "不合格"; d.uploadTime = d.meta.uploadTime;
         const saved = await Store.add(d); lastSavedRecordId = saved.id || d.id; $("qmUpdate").textContent = now(); toast("已上传至质量监测系统 · 合格率 " + d.passRate + "%");
       } catch (e) { alert(e.message); }
@@ -610,6 +680,7 @@
     $("resetForm").addEventListener("click", () => {
       if (!confirm("确定重置表单？此操作将清除所有已填写数据！")) return;
       root.querySelectorAll("#recordForm input, #recordForm select, #recordForm textarea").forEach((el) => { if (el.type === "radio") el.checked = el.value === "×" || el.value === "否"; else if (el.type !== "checkbox" && !el.readOnly && el.type !== "file") el.value = ""; });
+      state.prechecks.fill(null); root.querySelectorAll("[data-check-value]").forEach((b) => b.classList.remove("on")); root.querySelectorAll("[data-check-index]").forEach((item) => item.classList.remove("has-error")); updatePrechecks();
       WALLS.forEach((wall) => { STEPS_PER_WALL.forEach((s) => { const pc = $(`photos_${s.id}${wall}`); if (pc) pc.innerHTML = ""; const badge = $(`badge_${s.id}${wall}`); if (badge) { badge.className = "badge"; badge.textContent = "未完成"; } state.walls[wall].steps[s.id] = { photos: [], pass: null, done: false }; }); $(`sleeveItems${wall}`).innerHTML = "点击“生成选项”后可逐一勾选通透/不通透"; $(`sleevePassed${wall}`).value = 0; $(`sleeveFailed${wall}`).value = 0; $(`sleeveFailedNos${wall}`).value = ""; $(`sleeveTotal${wall}`).value = 8; $(`dwgBadge${wall}`).className = "badge"; $(`dwgBadge${wall}`).textContent = "未导入"; });
       const sc = $("recorderSignature"); sc.getContext("2d").clearRect(0, 0, sc.width, sc.height); recorderSig = null; $("qrcode").innerHTML = "生成后显示二维码"; $("qrLink").value = ""; $("checkResult").innerHTML = ""; $("checkSummary").className = "badge"; $("checkSummary").textContent = "尚未核对"; updateProgressBar(); evaluateAI(); stopSiren(); closeAlarmModal(); toast("表单已重置");
     });

@@ -37,6 +37,29 @@
       </div>
     </div>
 
+    <section class="card waste-ledger" style="margin-top:16px">
+      <div class="waste-head">
+        <div><div class="section-title" style="font-size:16px;margin:0"><span class="i"></span><i class="fa fa-recycle"></i> 建筑废料分类台账</div><p class="muted">记录产生时间、类别、重量和最终去向，形成可追溯的绿色施工档案。</p></div>
+        <span class="badge green"><span class="dot green"></span> 分类追溯启用</span>
+      </div>
+      <div class="waste-kpis">
+        <div><span>累计产生</span><b id="wasteTotal">0</b><em>kg</em></div><div><span>回收利用</span><b id="wasteRecovered">0</b><em>kg</em></div>
+        <div><span>资源化率</span><b id="wasteRate">0%</b><em>目标≥85%</em></div><div><span>追溯记录</span><b id="wasteCount">0</b><em>条</em></div>
+      </div>
+      <div class="waste-entry">
+        <label class="field"><span>产生时间</span><input id="wasteTime" type="datetime-local" /></label>
+        <label class="field"><span>废料类别</span><select id="wasteCategory"><option>钢材</option><option>混凝土</option><option>木模板</option><option>塑料及包装材料</option></select></label>
+        <label class="field"><span>重量（kg）</span><input id="wasteWeight" type="number" min="0.1" step="0.1" placeholder="如 35.5" /></label>
+        <label class="field"><span>处理方式</span><select id="wasteMethod"><option value="recycle">回收利用</option><option value="reuse">现场再利用</option><option value="disposal">合规清运</option></select></label>
+        <label class="field"><span>去向 / 接收单位</span><input id="wasteDestination" placeholder="回收站、再生骨料厂等" /></label>
+        <label class="field"><span>经办人</span><input id="wasteOwner" placeholder="现场责任人" /></label>
+        <button id="wasteAdd" class="btn btn-cyan"><i class="fa fa-plus"></i> 记入台账</button>
+      </div>
+      <div id="wasteAdvice" class="wave-report">AI分类建议：钢材应单独堆放并交由有资质回收单位，称重单与车辆信息同步归档。</div>
+      <div class="waste-toolbar"><b>最近记录</b><label>筛选 <select id="wasteFilter"><option value="all">全部类别</option><option>钢材</option><option>混凝土</option><option>木模板</option><option>塑料及包装材料</option></select></label></div>
+      <div class="table-scroll"><table class="waste-table"><thead><tr><th>追溯码</th><th>产生时间</th><th>类别</th><th>重量</th><th>处理方式</th><th>最终去向</th><th>经办人</th><th>操作</th></tr></thead><tbody id="wasteRows"></tbody></table></div>
+    </section>
+
     <div class="grid g2" style="margin-top:16px">
       <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-line-chart"></i> 现场环境趋势（风速 / 扬尘 / 噪声）</div><canvas id="envChart" height="120"></canvas></div>
       <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-tachometer"></i> 用电 / 能耗实时负荷</div><canvas id="powerChart" height="120"></canvas></div>
@@ -60,7 +83,7 @@
   },
 
   setup(root) {
-    const { $, pad } = window.Platform;
+    const { $, pad, toast } = window.Platform;
     const rnd = (a, b) => a + Math.random() * (b - a);
     const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -74,6 +97,36 @@
 
     const MATERIALS = [{ n: "预制剪力墙板", u: "块", total: 48 }, { n: "灌浆套筒", u: "个", total: 320 }, { n: "纵向连接钢筋", u: "根", total: 600 }, { n: "斜支撑", u: "套", total: 24 }, { n: "灌浆料", u: "袋", total: 80 }];
     function renderMaterials() { let totalStock = 0; $("materials").innerHTML = MATERIALS.map((m) => { const used = Math.floor(rnd(0.3, 0.8) * m.total), left = m.total - used; totalStock += left; const low = left / m.total < 0.25; return `<tr><td>${m.n}</td><td class="mute2">${left}/${m.total} ${m.u}</td><td style="width:120px"><div class="bar-wrap" style="height:8px"><div class="bar" style="width:${(left / m.total) * 100}%;background:${low ? "linear-gradient(90deg,#f59e0b,#ef4444)" : ""}"></div></div></td><td>${low ? '<span class="badge amber">偏低</span>' : '<span class="badge green">充足</span>'}</td></tr>`; }).join(""); $("kMaterial").textContent = totalStock + " 件"; }
+
+    const WASTE_KEY = "zhuang_waste_ledger_v1";
+    const wasteSuggestions = { "钢材": "钢材应单独堆放，交由有资质回收单位；称重单、车牌和接收证明需与追溯码关联。", "混凝土": "混凝土块宜破碎后用于再生骨料或场内临时道路基层，严禁与生活垃圾混装。", "木模板": "优先清理、修整后周转使用；无法复用的木料分类打包，交由木材回收单位。", "塑料及包装材料": "包装膜、塑料护角和编织袋应压缩打包，避免扬散，并交由可回收物处置单位。" };
+    const methodText = { recycle: "回收利用", reuse: "现场再利用", disposal: "合规清运" };
+    const escapeHtml = (value) => String(value || "").replace(/[&<>\"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const wasteSeed = () => [
+      { id: "WF-260715-001", time: "2026-07-15T08:40", category: "钢材", weight: 86.5, method: "recycle", destination: "县再生资源回收中心", owner: "王工" },
+      { id: "WF-260715-002", time: "2026-07-15T10:20", category: "混凝土", weight: 240, method: "reuse", destination: "场内临时道路基层", owner: "李工" },
+      { id: "WF-260715-003", time: "2026-07-15T14:10", category: "塑料及包装材料", weight: 18.6, method: "recycle", destination: "镇可回收物分拣站", owner: "张工" },
+    ];
+    function readWaste() { try { const rows = JSON.parse(localStorage.getItem(WASTE_KEY) || "null"); return Array.isArray(rows) ? rows : wasteSeed(); } catch { return wasteSeed(); } }
+    let wasteRecords = readWaste(); if (!localStorage.getItem(WASTE_KEY)) localStorage.setItem(WASTE_KEY, JSON.stringify(wasteRecords));
+    const saveWaste = () => localStorage.setItem(WASTE_KEY, JSON.stringify(wasteRecords));
+    function renderWaste() {
+      const filter = $("wasteFilter").value; const rows = filter === "all" ? wasteRecords : wasteRecords.filter((r) => r.category === filter);
+      const total = wasteRecords.reduce((sum, r) => sum + Number(r.weight || 0), 0); const recovered = wasteRecords.filter((r) => r.method !== "disposal").reduce((sum, r) => sum + Number(r.weight || 0), 0);
+      $("wasteTotal").textContent = total.toFixed(1); $("wasteRecovered").textContent = recovered.toFixed(1); $("wasteRate").textContent = total ? Math.round(recovered / total * 100) + "%" : "0%"; $("wasteCount").textContent = wasteRecords.length;
+      $("wasteRows").innerHTML = rows.slice().reverse().map((r) => `<tr><td><b style="color:#9fe9ff">${escapeHtml(r.id)}</b></td><td>${escapeHtml(r.time.replace("T", " "))}</td><td><span class="badge cyan">${escapeHtml(r.category)}</span></td><td>${Number(r.weight).toFixed(1)} kg</td><td>${escapeHtml(methodText[r.method])}</td><td>${escapeHtml(r.destination)}</td><td>${escapeHtml(r.owner)}</td><td><button class="btn btn-sm btn-ghost waste-delete" data-id="${escapeHtml(r.id)}" title="删除记录"><i class="fa fa-trash-o"></i></button></td></tr>`).join("") || '<tr><td colspan="8" class="muted" style="text-align:center">暂无该类别记录</td></tr>';
+    }
+    const updateWasteAdvice = () => { $("wasteAdvice").textContent = "AI分类建议：" + wasteSuggestions[$("wasteCategory").value]; };
+    const wasteNow = new Date(); wasteNow.setMinutes(wasteNow.getMinutes() - wasteNow.getTimezoneOffset()); $("wasteTime").value = wasteNow.toISOString().slice(0, 16);
+    $("wasteCategory").addEventListener("change", updateWasteAdvice); $("wasteFilter").addEventListener("change", renderWaste);
+    $("wasteAdd").addEventListener("click", () => {
+      const weight = Number($("wasteWeight").value); const destination = $("wasteDestination").value.trim(); const owner = $("wasteOwner").value.trim();
+      if (!$("wasteTime").value || !(weight > 0) || !destination || !owner) { alert("请完整填写产生时间、重量、最终去向和经办人"); return; }
+      const stamp = Date.now(); wasteRecords.push({ id: "WF-" + String(stamp).slice(-10), time: $("wasteTime").value, category: $("wasteCategory").value, weight, method: $("wasteMethod").value, destination, owner });
+      saveWaste(); renderWaste(); $("wasteWeight").value = ""; $("wasteDestination").value = ""; toast("废料记录已归档并生成追溯码");
+    });
+    $("wasteRows").addEventListener("click", (e) => { const btn = e.target.closest(".waste-delete"); if (!btn || !confirm("确定删除这条废料台账记录？")) return; wasteRecords = wasteRecords.filter((r) => r.id !== btn.dataset.id); saveWaste(); renderWaste(); toast("废料台账记录已删除"); });
+    updateWasteAdvice(); renderWaste();
 
     let env = { wind: 0.2, temp: 20, humid: 55, dust: 30, noise: 62 };
     let lastEnv = { windLevel: 0 };
