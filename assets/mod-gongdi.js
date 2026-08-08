@@ -5,13 +5,13 @@
     el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px">
       <h2 class="section-title" style="margin:0"><span class="i"></span>智慧工地平台 · “人机料法环”全要素数字化监控</h2>
-      <div class="badge green"><span class="dot green"></span> 实时在线 · <span id="gdClock">--:--:--</span></div>
+      <div class="badge amber"><span class="dot amber"></span> 本地样例数据 · <span id="gdClock">--:--:--</span></div>
     </div>
     <p class="muted" style="margin:0 0 16px">依托 BIM + 智慧工地平台与智能安全帽等设备，实现安全管控、人员管理、绿色施工全维度覆盖，从源头规避风险。</p>
 
     <div class="pill5">
       <div class="p"><b style="color:#9fe9ff" id="kPeople">--</b><span>人 · 在岗人员</span></div>
-      <div class="p"><b style="color:#6ee7b7" id="kMachine">--</b><span>机 · 设备在线</span></div>
+      <div class="p"><b style="color:#6ee7b7" id="kMachine">--</b><span>机 · 设备状态</span></div>
       <div class="p"><b style="color:#fcd34d" id="kMaterial">--</b><span>料 · 构件库存</span></div>
       <div class="p"><b style="color:#c4b5fd" id="kMethod">--</b><span>法 · 工序合规率</span></div>
       <div class="p"><b style="color:#7dd3fc" id="kEnv">--</b><span>环 · 作业条件</span></div>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="grid" style="grid-template-columns:1.4fr 1fr">
-      <div class="card glow"><div class="section-title" style="font-size:16px"><span class="i" style="background:linear-gradient(180deg,#f87171,#ef4444)"></span><i class="fa fa-bell"></i> 安全 / 质量隐患实时预警</div><div class="feed" id="alertFeed"></div></div>
+      <div class="card glow"><div class="section-title" style="font-size:16px"><span class="i" style="background:linear-gradient(180deg,#f87171,#ef4444)"></span><i class="fa fa-bell"></i> 安全 / 质量隐患滚动预警</div><div class="feed" id="alertFeed"></div></div>
       <div class="card glow"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-cloud"></i> 环境监测 · 吊装作业条件</div><div id="envBox"></div><div id="hoistVerdict" class="badge green" style="margin-top:12px;width:100%;justify-content:center;padding:10px">符合吊装作业条件</div></div>
     </div>
 
@@ -62,7 +62,7 @@
 
     <div class="grid g2" style="margin-top:16px">
       <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-line-chart"></i> 现场环境趋势（风速 / 扬尘 / 噪声）</div><canvas id="envChart" height="120"></canvas></div>
-      <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-tachometer"></i> 用电 / 能耗实时负荷</div><canvas id="powerChart" height="120"></canvas></div>
+      <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span><i class="fa fa-tachometer"></i> 用电 / 能耗负荷趋势</div><canvas id="powerChart" height="120"></canvas></div>
     </div>
 
     <div class="card glow" style="margin-top:16px">
@@ -144,11 +144,14 @@
     function pushAlert(a) { const d = new Date(); feedRows.unshift({ ...a, time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }); if (feedRows.length > 30) feedRows.pop(); $("alertFeed").innerHTML = feedRows.map((r) => `<div class="row"><span class="dot ${r.lv}" style="margin-top:4px"></span><div style="flex:1">${r.t}</div><span class="t">${r.time}</span></div>`).join(""); }
     [...ALERT_LIB].slice(0, 6).forEach(pushAlert);
 
-    Chart.defaults.color = "#94a3b8"; Chart.defaults.borderColor = "rgba(148,163,184,.12)";
     const labels = Array.from({ length: 12 }, (_, i) => i + ":00");
-    const envChart = new Chart($("envChart"), { type: "line", data: { labels, datasets: [{ label: "风速 m/s", data: labels.map(() => rnd(0, 4)), borderColor: "#00e5ff", tension: .35, pointRadius: 0 }, { label: "扬尘 μg", data: labels.map(() => rnd(20, 70)), borderColor: "#f59e0b", tension: .35, pointRadius: 0, yAxisID: "y1" }, { label: "噪声 dB", data: labels.map(() => rnd(50, 72)), borderColor: "#a855f7", tension: .35, pointRadius: 0, yAxisID: "y1" }] }, options: { responsive: true, plugins: { legend: { position: "bottom" } }, scales: { y: { position: "left" }, y1: { position: "right", grid: { display: false } } } } });
-    const powerChart = new Chart($("powerChart"), { type: "bar", data: { labels, datasets: [{ label: "能耗 kW", data: labels.map(() => rnd(20, 90)), backgroundColor: "rgba(56,189,248,.5)", borderColor: "#38bdf8", borderWidth: 1 }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
-    function shift(chart) { chart.data.datasets.forEach((ds, i) => { ds.data.shift(); ds.data.push(i === 0 && chart === envChart ? env.wind : rnd(...(chart === powerChart ? [20, 90] : i === 1 ? [20, 70] : [50, 72]))); }); chart.update("none"); }
+    let envChart = null, powerChart = null;
+    window.Platform.ensureVendor("chart").then(() => {
+      Chart.defaults.color = "#94a3b8"; Chart.defaults.borderColor = "rgba(148,163,184,.12)";
+      envChart = new Chart($("envChart"), { type: "line", data: { labels, datasets: [{ label: "风速 m/s", data: labels.map(() => rnd(0, 4)), borderColor: "#00e5ff", tension: .35, pointRadius: 0 }, { label: "扬尘 μg", data: labels.map(() => rnd(20, 70)), borderColor: "#f59e0b", tension: .35, pointRadius: 0, yAxisID: "y1" }, { label: "噪声 dB", data: labels.map(() => rnd(50, 72)), borderColor: "#a855f7", tension: .35, pointRadius: 0, yAxisID: "y1" }] }, options: { responsive: true, plugins: { legend: { position: "bottom" } }, scales: { y: { position: "left" }, y1: { position: "right", grid: { display: false } } } } });
+      powerChart = new Chart($("powerChart"), { type: "bar", data: { labels, datasets: [{ label: "能耗 kW", data: labels.map(() => rnd(20, 90)), backgroundColor: "rgba(56,189,248,.5)", borderColor: "#38bdf8", borderWidth: 1 }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }).catch((error) => window.Platform.toast(error.message));
+    function shift(chart) { if (!chart) return; chart.data.datasets.forEach((ds, i) => { ds.data.shift(); ds.data.push(i === 0 && chart === envChart ? env.wind : rnd(...(chart === powerChart ? [20, 90] : i === 1 ? [20, 70] : [50, 72]))); }); chart.update("none"); }
 
     const QA = [
       { k: ["吊装", "能否", "可以吊", "起吊"], a: () => { const wl = lastEnv.windLevel; return wl < 6 ? `当前风速约 ${env.wind.toFixed(1)} m/s（${wl} 级，<6级），温度 ${env.temp.toFixed(0)}℃，符合吊装作业条件。请执行“三确认（环境安全、设备完好、构件合格）、一复核（方案）、两到位”，试吊高度 300mm 停顿 3 秒后再吊运。` : `当前风速 ${env.wind.toFixed(1)} m/s 已达 ${wl} 级，超过 6 级限值，不符合吊装条件。建议立停、报告、复核后再启动。`; } },
@@ -168,7 +171,7 @@
     const SYS = "你是“装配智建·和美乡村”平台的 AI 数字人施工指挥助手，是一名装配式混凝土建筑（预制剪力墙吊装、灌浆套筒连接、钢筋绑扎）领域的资深技术专家。请严格依据《装配式混凝土建筑技术标准》《混凝土结构工程施工质量验收规范》等规范，对施工现场进行管理指挥；回答务必专业、简洁（一般 80~200 字），给出具体数值与判定标准，发现安全或质量风险要明确预警并给整改建议。只回答与本工程施工、安全、质量、规范相关的问题。";
     const history = [{ role: "system", content: SYS }];
     let aiLive = false;
-    function liveState() { return `（当前现场实时：风速 ${env.wind.toFixed(1)} m/s 约 ${lastEnv.windLevel} 级，温度 ${env.temp.toFixed(0)}℃；吊装作业要求风速<6级、温度5~38℃。）`; }
+    function liveState() { return `（当前样例状态：风速 ${env.wind.toFixed(1)} m/s 约 ${lastEnv.windLevel} 级，温度 ${env.temp.toFixed(0)}℃；吊装作业要求风速<6级、温度5~38℃。）`; }
 
     async function send() {
       const v = $("chatInput").value.trim(); if (!v) return;

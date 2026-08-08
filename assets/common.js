@@ -48,6 +48,40 @@
   const $ = (id) => document.getElementById(id);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>'"]/g, (ch) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+    })[ch]);
+  }
+
+  const assetUrl = (name) => new URL("assets/vendor/" + name, document.baseURI).href;
+  const VENDORS = {
+    chart: { src: assetUrl("chart.umd.min.js"), test: () => window.Chart },
+    qrcode: { src: assetUrl("qrcode.min.js"), test: () => window.QRCode },
+    jspdf: { src: assetUrl("jspdf.umd.min.js"), test: () => window.jspdf?.jsPDF },
+    html2canvas: { src: assetUrl("html2canvas.min.js"), test: () => window.html2canvas },
+    tesseract: { src: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js", test: () => window.Tesseract },
+  };
+  const vendorLoads = new Map();
+  function ensureVendor(name) {
+    const vendor = VENDORS[name];
+    if (!vendor) return Promise.reject(new Error("未知组件：" + name));
+    if (vendor.test()) return Promise.resolve(vendor.test());
+    if (vendorLoads.has(name)) return vendorLoads.get(name);
+    const pending = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = vendor.src;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = () => vendor.test() ? resolve(vendor.test()) : reject(new Error(name + " 组件初始化失败"));
+      script.onerror = () => reject(new Error(name + " 组件加载失败，请检查网络"));
+      document.head.appendChild(script);
+    }).catch((error) => { vendorLoads.delete(name); throw error; });
+    vendorLoads.set(name, pending);
+    return pending;
+  }
+  function ensureVendors(names) { return Promise.all(names.map(ensureVendor)); }
+
   function fmt(n, d = 1) {
     return (n === null || n === undefined || isNaN(n)) ? "" : Number(n).toFixed(d);
   }
@@ -63,7 +97,9 @@
       t.id = "globalToast"; t.className = "toast";
       document.body.appendChild(t);
     }
-    t.innerHTML = `<i class="fa fa-check-circle-o"></i> ${msg}`;
+    const icon = document.createElement("i");
+    icon.className = "fa fa-check-circle-o";
+    t.replaceChildren(icon, document.createTextNode(" " + String(msg)));
     t.classList.add("show");
     clearTimeout(t._timer);
     t._timer = setTimeout(() => t.classList.remove("show"), 2600);
@@ -88,7 +124,7 @@
     if (API_BASE == null) return false;
     if (_onlineCache !== null && Date.now() - _onlineAt < 8000) return _onlineCache;
     try {
-      const r = await fetch((API_BASE || "") + "/api/health", { method: "GET" });
+      const r = await fetch((API_BASE || "") + "/api/health", { method: "GET", signal: AbortSignal.timeout(2500) });
       _onlineCache = r.ok;
     } catch { _onlineCache = false; }
     _onlineAt = Date.now();
@@ -113,6 +149,7 @@
       }
       return _lsList();
     },
+    async backendOnline() { return _backendOnline(); },
     async add(record) {
       record.id = record.id || ("PC-" + Date.now());
       record.uploadTime = record.uploadTime || now();
@@ -182,7 +219,7 @@
       _lsSave(list);
       return list;
     },
-    // 演示数据：首次访问时注入若干样例记录，便于看板/溯源演示
+    // 初始样例数据：首次访问时注入若干记录，便于看板和溯源功能就绪。
     async seedIfEmpty() {
       const list = _lsList();
       if (list.length || localStorage.getItem("zhuang_seeded")) return;
@@ -291,7 +328,7 @@
 
   /* ---------------- 导出 ---------------- */
   window.Platform = {
-    $, $$, fmt, pad, now, toast, Store, AI,
+    $, $$, fmt, pad, now, toast, escapeHtml, ensureVendor, ensureVendors, Store, AI,
     startSiren, stopSiren, renderNav,
   };
 

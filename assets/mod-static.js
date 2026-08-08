@@ -56,7 +56,7 @@
         <div class="tool"><div class="ti"><i class="fa fa-arrows-v"></i></div><div><b>数显靠尺</b><div class="muted" style="font-size:12px">垂直度可视化，误差 ±0.1mm/m</div></div></div>
         <div class="tool"><div class="ti"><i class="fa fa-align-justify"></i></div><div><b>纵筋定位器</b><div class="muted" style="font-size:12px">固定纵筋位置，绑扎不偏移</div></div></div>
         <div class="tool"><div class="ti"><i class="fa fa-microchip"></i></div><div><b>装配慧检 AI 系统</b><div class="muted" style="font-size:12px">数据比对 · 超差报警 · 图纸核对</div></div></div>
-        <div class="tool"><div class="ti"><i class="fa fa-rss"></i></div><div><b>环境检测器</b><div class="muted" style="font-size:12px">风速 / 温度实时判定作业条件</div></div></div>
+        <div class="tool"><div class="ti"><i class="fa fa-rss"></i></div><div><b>环境检测器</b><div class="muted" style="font-size:12px">风速 / 温度联合判定作业条件</div></div></div>
         <div class="tool"><div class="ti"><i class="fa fa-sitemap"></i></div><div><b>智慧工地平台</b><div class="muted" style="font-size:12px">人机料法环全要素监控</div></div></div>
       </div>
     </div>`;
@@ -67,7 +67,7 @@
     el.innerHTML = `
     <h2 class="section-title"><span class="i"></span>项目创新 · 三大创新点</h2>
     <div class="grid g3" style="margin-bottom:26px">
-      <div class="card glow"><span class="chip">创新点一</span><div class="innov" style="margin-top:12px"><h3>质量管控数字化</h3><p class="muted" style="font-size:14px">自主研发<b style="color:#9fe9ff">装配慧检 AI 系统</b>，智慧工地全时监控，解决纸质易污损、难追溯、效率低的痛点。</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="badge cyan">实时采集</span><span class="badge cyan">智能比对</span><span class="badge cyan">超差报警</span><span class="badge cyan">图纸核对</span></div></div></div>
+      <div class="card glow"><span class="chip">创新点一</span><div class="innov" style="margin-top:12px"><h3>质量管控数字化</h3><p class="muted" style="font-size:14px">自主研发<b style="color:#9fe9ff">装配慧检 AI 系统</b>，智慧工地全过程监测，解决纸质易污损、难追溯、效率低的痛点。</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="badge cyan">过程采集</span><span class="badge cyan">智能比对</span><span class="badge cyan">超差报警</span><span class="badge cyan">图纸核对</span></div></div></div>
       <div class="card glow"><span class="chip">创新点二</span><div class="innov" style="margin-top:12px"><h3>施工工具革新化</h3><p class="muted" style="font-size:14px">吊装定位激光化、纵筋定位精准化，<b style="color:#9fe9ff">速装周期短、易操队伍熟、质控数据明、隐患皆消除</b>。</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="badge green">激光定位器</span><span class="badge green">数显靠尺</span><span class="badge green">纵筋定位器</span></div></div></div>
       <div class="card glow"><span class="chip">创新点三</span><div class="innov" style="margin-top:12px"><h3>工艺流程精益化</h3><p class="muted" style="font-size:14px">缩模验工艺、五步定标准、参数控精度，形成<b style="color:#9fe9ff">乡村可复制</b>的预制构件施工方案。</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="badge amber">1:5 缩尺模型</span><span class="badge amber">标准五步</span><span class="badge amber">参数控精度</span></div></div></div>
     </div>
@@ -91,7 +91,7 @@
     render(el) {
       el.innerHTML = `
       <h2 class="section-title"><span class="i"></span>AI 作业票 · 三确认一复核两到位</h2>
-      <p class="muted" style="margin:0 0 18px">对照稿子中的吊装关键控制点，把“未达标准，坚决不试吊；作业超限，立停、报告、复核后再启动”做成可执行判定。DeepSeek 在线时会生成专业整改闭环建议，离线时按本地规则兜底。</p>
+      <p class="muted" style="margin:0 0 18px">依据吊装作业关键控制要求，将“未达标准，不予试吊；作业超限，立即停止、报告、复核后再启动”转化为可执行判定。DeepSeek 可用时生成专业整改建议，不可用时按本地规则处理。</p>
       <div class="grid g3" style="margin-bottom:18px">
         <div class="card glow"><div class="section-title" style="font-size:15px"><span class="i"></span>准吊指数</div><div class="num-big" id="ticketScore">--%</div><div class="ticket-meter"><i id="ticketBar"></i></div><p class="muted" id="ticketScoreText" style="font-size:13px;margin:10px 0 0">等待现场数据复核</p></div>
         <div class="card"><div class="section-title" style="font-size:15px"><span class="i"></span>控制口令</div><p id="ticketCommand" style="font-size:20px;font-weight:900;margin:0;color:#9fe9ff">先复核，再试吊</p><p class="muted" style="font-size:13px;margin:10px 0 0">自动输出“准许试吊”或“立停-报告-复核-整改”。</p></div>
@@ -142,7 +142,7 @@
     },
     onShow(el) { if (this._refresh) this._refresh(); },
     setup(root) {
-      const { toast, now, AI } = window.Platform;
+      const { toast, now, escapeHtml, AI } = window.Platform;
       const q = (id) => root.querySelector("#" + id);
       const key = "zhuang_work_tickets_v1";
       const fields = ["tkWind", "tkTemp", "tkAngle", "tkTrialHeight", "tkPause", "tkDistance", "tkRoughDepth", "tkRoughArea", "tkGasket", "tkCid", "tkGrid", "tkTeam", "tkSleeve", "tkComponent", "tkDevice", "tkBrief", "tkDuty", "tkPlan"];
@@ -184,7 +184,7 @@
       function renderHistory() {
         const list = load();
         q("ticketCount").textContent = list.length + " 条";
-        q("ticketHistory").innerHTML = list.length ? list.map((t) => `<div class="award"><div class="ic" style="background:${t.pass ? "linear-gradient(135deg,#10b981,#06b6d4)" : "linear-gradient(135deg,#f59e0b,#ef4444)"}"><i class="fa ${t.pass ? "fa-check" : "fa-warning"}"></i></div><div><b>${t.cid} · ${t.command}</b><div class="muted" style="font-size:13px">${t.time} · ${t.grid} · ${t.team} · 准吊指数 ${t.score}%</div><div class="mute2" style="font-size:12px;margin-top:4px">${t.summary}</div></div></div>`).join("") : '<span class="mute2">暂无历史作业票。</span>';
+        q("ticketHistory").innerHTML = list.length ? list.map((t) => `<div class="award"><div class="ic" style="background:${t.pass ? "linear-gradient(135deg,#10b981,#06b6d4)" : "linear-gradient(135deg,#f59e0b,#ef4444)"}"><i class="fa ${t.pass ? "fa-check" : "fa-warning"}"></i></div><div><b>${escapeHtml(t.cid)} · ${escapeHtml(t.command)}</b><div class="muted" style="font-size:13px">${escapeHtml(t.time)} · ${escapeHtml(t.grid)} · ${escapeHtml(t.team)} · 准吊指数 ${escapeHtml(t.score)}%</div><div class="mute2" style="font-size:12px;margin-top:4px">${escapeHtml(t.summary)}</div></div></div>`).join("") : '<span class="mute2">暂无历史作业票。</span>';
       }
       async function generate(fixOnly) {
         const d = readData();
@@ -237,7 +237,7 @@
     render(el) {
       el.innerHTML = `
       <h2 class="section-title"><span class="i"></span>AI 闭环中心 · 派单 / 规范 / 日志 / 评分</h2>
-      <p class="muted" style="margin:0 0 18px">面向真实施工管理，把“发现问题”继续推进到“AI派单、规范依据、整改复检、日志归档、班组评分”，让平台从展示型看板变成可执行的质量闭环系统。</p>
+      <p class="muted" style="margin:0 0 18px">面向施工质量管理，把“发现问题”继续推进到“AI派单、规范依据、整改复检、日志归档、班组评分”，形成可执行的质量闭环系统。</p>
       <div class="ops-tabs">
         <button class="on" data-ops="orders"><i class="fa fa-tasks"></i> 整改派单</button>
         <button data-ops="spec"><i class="fa fa-book"></i> 规范助手</button>
@@ -258,7 +258,6 @@
             <label class="muted" style="display:block;margin-top:12px">问题描述<textarea id="woDesc" rows="4" placeholder="例如：第1面墙高度三点差值超过10mm，需复核垫片标高和斜支撑固定。"></textarea></label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
               <button id="btnCreateWO" class="btn btn-cyan"><i class="fa fa-magic"></i> AI生成整改工单</button>
-              <button id="btnSeedWO" class="btn btn-ghost"><i class="fa fa-refresh"></i> 注入示例工单</button>
             </div>
           </div>
           <div class="card">
@@ -309,7 +308,7 @@
     },
     onShow(el) { if (this._refresh) this._refresh(); },
     setup(root) {
-      const { toast, now, Store, AI } = window.Platform;
+      const { toast, now, escapeHtml, Store, AI } = window.Platform;
       const q = (id) => root.querySelector("#" + id);
       const key = "zhuang_workorders_v1";
       const load = () => { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } };
@@ -327,7 +326,7 @@
       function renderOrders() {
         const list = load();
         q("woCount").textContent = list.length + "项";
-        q("woList").innerHTML = list.length ? list.map((o) => `<div class="work-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${o.type} · ${o.cid}</b><span class="badge ${o.status === "已销项" ? "green" : o.level === "重大" ? "red" : "amber"}">${o.status}</span></div><div class="muted" style="font-size:13px;margin:6px 0">${o.team} · ${o.level}风险 · ${o.time}</div><div style="font-size:13px;line-height:1.7;color:#dbeafe;white-space:pre-wrap">${o.advice}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-sm btn-ghost wo-next" data-id="${o.id}">${o.status === "已销项" ? "重新打开" : "推进状态"}</button></div></div>`).join("") : '<span class="mute2">暂无整改工单。</span>';
+        q("woList").innerHTML = list.length ? list.map((o) => `<div class="work-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${escapeHtml(o.type)} · ${escapeHtml(o.cid)}</b><span class="badge ${o.status === "已销项" ? "green" : o.level === "重大" ? "red" : "amber"}">${escapeHtml(o.status)}</span></div><div class="muted" style="font-size:13px;margin:6px 0">${escapeHtml(o.team)} · ${escapeHtml(o.level)}风险 · ${escapeHtml(o.time)}</div><div style="font-size:13px;line-height:1.7;color:#dbeafe;white-space:pre-wrap">${escapeHtml(o.advice)}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-sm btn-ghost wo-next" data-id="${escapeHtml(o.id)}">${o.status === "已销项" ? "重新打开" : "推进状态"}</button></div></div>`).join("") : '<span class="mute2">暂无整改工单。</span>';
         root.querySelectorAll(".wo-next").forEach((btn) => btn.addEventListener("click", () => {
           const list = load();
           const item = list.find((x) => String(x.id) === btn.dataset.id);
@@ -349,15 +348,6 @@
         const list = load();
         list.unshift({ id: Date.now(), time: now(), status: "待整改", advice, ...d });
         save(list); renderOrders(); renderRisk(); toast("整改工单已生成");
-      }
-      function seedOrders() {
-        const list = load();
-        [
-          { type: "尺寸超差", level: "较大", cid: "WQ-3F-A5-01", team: "装配一组", desc: "高度三点差值超过10mm" },
-          { type: "套筒不通透", level: "重大", cid: "WQ-3F-A6-02", team: "装配二组", desc: "灌浆套筒通透性不足" },
-          { type: "BHI健康预警", level: "一般", cid: "3号房-运维点位T02", team: "运维组", desc: "倾角监测进入关注区间" },
-        ].forEach((d, i) => list.unshift({ id: Date.now() + i, time: now(), status: i === 0 ? "待复检" : "待整改", advice: localAdvice(d), ...d }));
-        save(list); renderOrders(); renderRisk(); toast("示例工单已注入");
       }
       const specLocal = (text) => {
         if (/套筒|灌浆/.test(text)) return "套筒不通透应暂停进入下一工序，清孔、通球或内窥复核，确认孔道畅通后再灌浆；复检照片、套筒编号和责任人需同步归档。";
@@ -424,7 +414,6 @@
       }));
       root.querySelectorAll(".spec-fast").forEach((btn) => btn.addEventListener("click", () => { q("specQ").value = btn.dataset.q; askSpec(); }));
       q("btnCreateWO").addEventListener("click", createOrder);
-      q("btnSeedWO").addEventListener("click", seedOrders);
       q("btnSpecAsk").addEventListener("click", askSpec);
       q("btnGenLog").addEventListener("click", genLog);
       this._refresh = () => { renderOrders(); renderRisk(); };
@@ -439,7 +428,7 @@
       <h2 class="section-title"><span class="i"></span>一码溯源 · 构件唯一“数字身份证”</h2>
       <p class="muted" style="margin:0 0 18px">为每个构件建立唯一数字身份，把 AI 数字表格、拍照留痕与检测数据一一绑定，扫码即可全生命周期信息化追溯与管理。</p>
       <div class="card" style="margin-bottom:18px">
-        <div class="searchbar"><input id="cidInput" placeholder="输入构件 ID（cid），如 WQ-3F-A5-01" /><button id="btnSearch" class="btn btn-cyan"><i class="fa fa-search"></i> 查询溯源</button><button id="btnScan" class="btn btn-ghost"><i class="fa fa-qrcode"></i> 模拟扫码</button></div>
+        <div class="searchbar"><input id="cidInput" placeholder="输入构件 ID（cid），如 WQ-3F-A5-01" /><button id="btnSearch" class="btn btn-cyan"><i class="fa fa-search"></i> 查询溯源</button><button id="btnScan" class="btn btn-ghost"><i class="fa fa-random"></i> 随机抽检</button></div>
         <div class="muted" style="font-size:13px">已入库构件（点击快速查询）：</div>
         <div id="cidList" style="margin-top:6px"></div>
       </div>
@@ -448,13 +437,13 @@
     },
     onShow(el) { if (this._list) this._list(); },
     setup(root) {
-      const { $, Store, toast } = window.Platform;
+      const { $, Store, toast, escapeHtml } = window.Platform;
       const STEP_NAMES = { size: "墙体尺寸检查", line: "定位弹线", fix: "固定安装", rebar: "钢筋绑扎" };
       const q = (id) => root.querySelector("#" + id);
       const listCids = async () => {
         const all = await Store.list(); const cids = [];
         all.forEach((r) => { if (r.walls) Object.values(r.walls).forEach((w) => { if (w.cid && !cids.includes(w.cid)) cids.push(w.cid); }); });
-        q("cidList").innerHTML = cids.slice(0, 16).map((c) => `<span class="cidpill">${c}</span>`).join("") || '<span class="mute2">暂无数据，请先在“装配慧检”上传记录。</span>';
+        q("cidList").innerHTML = cids.slice(0, 16).map((c) => `<span class="cidpill">${escapeHtml(c)}</span>`).join("") || '<span class="mute2">暂无数据，请先在“装配慧检”上传记录。</span>';
         root.querySelectorAll(".cidpill").forEach((p) => p.addEventListener("click", () => { q("cidInput").value = p.textContent; search(); }));
         return cids;
       };
@@ -469,7 +458,7 @@
       async function search() {
         const cid = q("cidInput").value.trim(); if (!cid) { q("traceResult").innerHTML = ""; return; }
         const recs = await Store.findByCid(cid);
-        if (!recs.length) { q("traceResult").innerHTML = `<div class="card" style="text-align:center;padding:30px"><i class="fa fa-search" style="font-size:30px;color:var(--text-mute)"></i><div class="muted" style="margin-top:10px">未找到构件 <b>${cid}</b> 的溯源记录</div></div>`; return; }
+        if (!recs.length) { q("traceResult").innerHTML = `<div class="card" style="text-align:center;padding:30px"><i class="fa fa-search" style="font-size:30px;color:var(--text-mute)"></i><div class="muted" style="margin-top:10px">未找到构件 <b>${escapeHtml(cid)}</b> 的溯源记录</div></div>`; return; }
         const r = recs[recs.length - 1];
         const wallNo = Object.keys(r.walls).find((k) => (r.walls[k].cid || "").trim() === cid) || "1";
         const w = r.walls[wallNo]; const stCls = r.status === "合格" ? "green" : r.status === "预警" ? "amber" : "red";
@@ -482,31 +471,36 @@
           const photoHtml = photos.length ? `<div class="trace-photos">${photos.map((p, idx) => {
             const src = typeof p === "string" ? p : p.dataUrl;
             const title = typeof p === "string" ? `照片${idx + 1}` : `${p.name || "照片"} · ${p.time || ""}`;
-            return src ? `<img src="${src}" alt="${title}" title="${title}">` : "";
+            const safeSrc = /^(blob:|data:image\/|https?:)/i.test(String(src || "")) ? escapeHtml(src) : "";
+            return safeSrc ? `<img src="${safeSrc}" alt="${escapeHtml(title)}" title="${escapeHtml(title)}">` : "";
           }).join("")}</div>` : "";
           return `<div class="ev"><div class="dotc" style="background:${c === "green" ? "rgba(16,185,129,.18)" : c === "red" ? "rgba(239,68,68,.18)" : "rgba(245,158,11,.18)"};border:1px solid var(--line)"><i class="fa ${done ? "fa-check" : "fa-clock-o"}" style="color:${c === "green" ? "#6ee7b7" : c === "red" ? "#fca5a5" : "#fcd34d"}"></i></div><div style="flex:1"><b>${STEP_NAMES[k]}</b> ${verdict(s.pass)}<div class="mute2" style="font-size:12px">${done ? `已完成拍照留痕 · ${photos.length} 张照片` : "待完成"}</div>${photoHtml}</div></div>`;
         }).join("");
         q("traceResult").innerHTML = `
-        <div class="card glow" style="margin-bottom:16px"><div class="section-title" style="font-size:16px"><span class="i"></span>构件数字身份证 · ${cid}</div>
+        <div class="card glow" style="margin-bottom:16px"><div class="section-title" style="font-size:16px"><span class="i"></span>构件数字身份证 · ${escapeHtml(cid)}</div>
           <div class="idcard"><div class="qr" id="qrHolder"></div><div style="flex:1;min-width:260px"><div class="grid g2">
-            <div><div class="mute2" style="font-size:12px">构件类型</div><b>${w.componentType || "-"}</b></div>
-            <div><div class="mute2" style="font-size:12px">施工场地</div><b>${w.matchSession || "-"}</b></div>
-            <div><div class="mute2" style="font-size:12px">图纸编号</div><b>${w.drawingNo || "-"}</b></div>
-            <div><div class="mute2" style="font-size:12px">楼栋/轴线</div><b>${w.grid || "-"}</b></div>
-            <div><div class="mute2" style="font-size:12px">项目编号</div><b>${w.pid || "-"}</b></div>
+            <div><div class="mute2" style="font-size:12px">构件类型</div><b>${escapeHtml(w.componentType || "-")}</b></div>
+            <div><div class="mute2" style="font-size:12px">施工场地</div><b>${escapeHtml(w.matchSession || "-")}</b></div>
+            <div><div class="mute2" style="font-size:12px">图纸编号</div><b>${escapeHtml(w.drawingNo || "-")}</b></div>
+            <div><div class="mute2" style="font-size:12px">楼栋/轴线</div><b>${escapeHtml(w.grid || "-")}</b></div>
+            <div><div class="mute2" style="font-size:12px">项目编号</div><b>${escapeHtml(w.pid || "-")}</b></div>
             <div><div class="mute2" style="font-size:12px">套筒通透</div><b>${(w.sleeveTotal || 0) - (w.sleeveFailed || 0)}/${w.sleeveTotal || 0}</b></div>
-            <div><div class="mute2" style="font-size:12px">记录人</div><b>${r.recorder || "-"}</b></div>
-            <div><div class="mute2" style="font-size:12px">上传时间</div><b>${r.uploadTime || "-"}</b></div>
-          </div><div style="margin-top:12px;display:flex;gap:10px;align-items:center"><span class="badge ${stCls}" style="font-size:14px;padding:6px 14px">综合判定：${r.status || "-"}</span><span class="badge cyan">合格率 ${r.passRate ?? "-"}%</span></div></div></div>
+            <div><div class="mute2" style="font-size:12px">记录人</div><b>${escapeHtml(r.recorder || "-")}</b></div>
+            <div><div class="mute2" style="font-size:12px">上传时间</div><b>${escapeHtml(r.uploadTime || "-")}</b></div>
+          </div><div style="margin-top:12px;display:flex;gap:10px;align-items:center"><span class="badge ${stCls}" style="font-size:14px;padding:6px 14px">综合判定：${escapeHtml(r.status || "-")}</span><span class="badge cyan">合格率 ${escapeHtml(r.passRate ?? "-")}%</span></div></div></div>
         </div>
-        <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span>关键工序留痕（全生命周期）</div><div class="timeline">${timeline}</div><div class="muted" style="font-size:12px;margin-top:6px">记录ID：${r.id} · 工位号：${r.workstationNo || "-"} · 施工队伍：${w.teamId || "-"}</div></div>`;
-        const holder = q("qrHolder"); holder.innerHTML = "";
+        <div class="card"><div class="section-title" style="font-size:16px"><span class="i"></span>关键工序留痕（全生命周期）</div><div class="timeline">${timeline}</div><div class="muted" style="font-size:12px;margin-top:6px">记录ID：${escapeHtml(r.id)} · 工位号：${escapeHtml(r.workstationNo || "-")} · 施工队伍：${escapeHtml(w.teamId || "-")}</div></div>`;
+        const holder = q("qrHolder"); holder.textContent = "正在加载二维码组件…";
         const qrUrl = location.href.split("#")[0].split("?")[0] + `?cid=${encodeURIComponent(cid)}#trace`;
-        new QRCode(holder, { text: qrUrl, width: 150, height: 150, colorDark: "#00e5ff", colorLight: "#0b1220", correctLevel: QRCode.CorrectLevel.L });
+        try {
+          await window.Platform.ensureVendor("qrcode");
+          holder.innerHTML = "";
+          new QRCode(holder, { text: qrUrl, width: 150, height: 150, colorDark: "#00e5ff", colorLight: "#0b1220", correctLevel: QRCode.CorrectLevel.L });
+        } catch (e) { holder.textContent = "二维码加载失败，可复制构件链接继续使用。"; }
       }
       q("btnSearch").addEventListener("click", search);
       q("cidInput").addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
-      q("btnScan").addEventListener("click", async () => { const cids = await listCids(); if (!cids.length) { alert("暂无可扫码的构件，请先上传记录。"); return; } q("cidInput").value = cids[Math.floor(Math.random() * cids.length)]; toast("模拟扫码成功"); search(); });
+      q("btnScan").addEventListener("click", async () => { const cids = await listCids(); if (!cids.length) { alert("暂无可抽检的构件，请先上传记录。"); return; } q("cidInput").value = cids[Math.floor(Math.random() * cids.length)]; toast("已抽取一条构件记录"); search(); });
       listCids().then(() => { const cid = initialCidFromUrl(); if (cid) { q("cidInput").value = cid; search(); } });
     },
   });

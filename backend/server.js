@@ -9,17 +9,23 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
+const crypto = require("crypto");
 
 const PORT = process.env.PORT || 8080;
 const ROOT = path.join(__dirname, "..");            // 前端根目录（zhuang/）
 const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "records.json");
 const API_TOKEN = process.env.PLATFORM_API_TOKEN || "";
+const TRUST_PROXY = process.env.TRUST_PROXY === "1";
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:8080,http://127.0.0.1:8080,https://likexian2007-cloud.github.io")
   .split(",").map((x) => x.trim()).filter(Boolean);
 const RATE_WINDOW_MS = Number(process.env.RATE_WINDOW_MS || 60000);
 const RATE_LIMIT = Number(process.env.RATE_LIMIT || 180);
 const rateBuckets = new Map();
+setInterval(() => {
+  const cutoff = Date.now() - RATE_WINDOW_MS * 2;
+  for (const [key, bucket] of rateBuckets) if (bucket.start < cutoff) rateBuckets.delete(key);
+}, Math.max(RATE_WINDOW_MS, 30000)).unref();
 
 /* ---- AI 配置（key 仅存服务端，已 .gitignore，不随前端/仓库泄露） ---- */
 const AI_CONFIG_FILE = path.join(__dirname, "ai-config.json");
@@ -146,8 +152,8 @@ async function extractDrawingWithAI(text) {
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]", "utf8");
 
-/* 首次运行（数据为空）注入演示记录，便于质量看板 / 一码溯源展示 */
-function seedDemo() {
+/* 首次运行（数据为空）注入初始样例记录，便于质量看板和一码溯源功能就绪。 */
+function seedInitialRecords() {
   try {
     const cur = JSON.parse(fs.readFileSync(DATA_FILE, "utf8") || "[]");
     if (cur.length) return;
@@ -175,14 +181,16 @@ function seedDemo() {
   });
   fs.writeFileSync(DATA_FILE, JSON.stringify(out, null, 2), "utf8");
 }
-seedDemo();
+seedInitialRecords();
 
 function readRecords() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8") || "[]"); }
   catch { return []; }
 }
 function writeRecords(list) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(list, null, 2), "utf8");
+  const tempFile = DATA_FILE + ".tmp";
+  fs.writeFileSync(tempFile, JSON.stringify(list, null, 2), "utf8");
+  fs.renameSync(tempFile, DATA_FILE);
 }
 
 const MIME = {
@@ -193,7 +201,13 @@ const MIME = {
 };
 
 function clientIp(req) {
-  return String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "local").split(",")[0].trim();
+  const forwarded = TRUST_PROXY ? req.headers["x-forwarded-for"] : "";
+  return String(forwarded || req.socket.remoteAddress || "local").split(",")[0].trim();
+}
+
+function isLoopback(req) {
+  const ip = clientIp(req).replace(/^::ffff:/, "");
+  return ip === "127.0.0.1" || ip === "::1" || ip === "local";
 }
 
 function corsOrigin(req) {
@@ -230,8 +244,16 @@ function rateLimited(req) {
 }
 
 function requireApiToken(req, res) {
-  if (!API_TOKEN) return true;
-  if (req.headers["x-platform-token"] === API_TOKEN) return true;
+  // 本机开发可无令牌运行；非本机写操作默认关闭，避免误把无鉴权接口暴露到公网。
+  if (!API_TOKEN) {
+    if (isLoopback(req)) return true;
+    sendJSON(req, res, 503, { error: "Public write API is disabled until PLATFORM_API_TOKEN is configured" });
+    return false;
+  }
+  const provided = String(req.headers["x-platform-token"] || "");
+  const expected = Buffer.from(API_TOKEN);
+  const actual = Buffer.from(provided);
+  if (expected.length === actual.length && crypto.timingSafeEqual(expected, actual)) return true;
   sendJSON(req, res, 401, { error: "Unauthorized" });
   return false;
 }
@@ -243,7 +265,12 @@ function sendJSON(req, res, code, obj) {
 }
 
 function serveStatic(req, res, pathname) {
-  let rel = decodeURIComponent(pathname);
+  let rel;
+  try { rel = decodeURIComponent(pathname); }
+  catch {
+    res.writeHead(400, securityHeaders(req, { "Content-Type": "text/plain; charset=utf-8" }));
+    return res.end("Bad Request");
+  }
   if (rel === "/" || rel === "") rel = "/index.html";
   const blocked = rel.replace(/\\/g, "/").toLowerCase();
   if (
@@ -256,8 +283,9 @@ function serveStatic(req, res, pathname) {
     return res.end("Forbidden");
   }
   // 防目录穿越
-  const filePath = path.join(ROOT, path.normalize(rel).replace(/^(\.\.[/\\])+/, ""));
-  if (!filePath.startsWith(ROOT)) { res.writeHead(403, securityHeaders(req)); return res.end("Forbidden"); }
+  const filePath = path.resolve(ROOT, "." + path.normalize(rel));
+  const relative = path.relative(ROOT, filePath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) { res.writeHead(403, securityHeaders(req)); return res.end("Forbidden"); }
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404, securityHeaders(req, { "Content-Type": "text/plain; charset=utf-8" })); return res.end("404 Not Found"); }
     res.writeHead(200, securityHeaders(req, { "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream" }));
@@ -382,7 +410,7 @@ server.listen(PORT, () => {
   console.log("  装配智建·和美乡村 平台 后端已启动");
   console.log("  访问地址:  http://localhost:" + PORT);
   console.log("  数据文件:  " + DATA_FILE);
-  console.log("  AI 接入:   " + (AI_ENABLED ? "已启用 DeepSeek（" + AI_CFG.model + "）" : "未配置（数字人/核对将回退模拟）"));
+  console.log("  AI 接入:   " + (AI_ENABLED ? "已启用 DeepSeek（" + AI_CFG.model + "）" : "未配置（数字人/核对将使用本地规则）"));
   console.log("  按 Ctrl+C 退出");
   console.log("==================================================");
 });
