@@ -11,7 +11,7 @@
   const cache = {};
   let current = null;
 
-  const ACCESS_HASH = "ae27b5d6f9a09319d15ffb48a9674f76a07bdfd48b5b38addd3a832808ceceac";
+  const ACCESS_HASH = "e5ea11e58ec364b379ebd4ca2967547982a92191b4371ed4463842bc56542956";
   const ACCESS_MARK = "ip-protected-v1";
   const COPYRIGHT_OWNER = "装配智建·和美乡村项目组";
   async function sha256(text) {
@@ -24,7 +24,7 @@
     const mark = document.createElement("div");
     mark.id = "copyrightWatermark";
     mark.className = "copyright-watermark";
-    mark.innerHTML = `<span>${COPYRIGHT_OWNER}</span><span>内部演示资料 · 未经授权禁止复制传播</span>`;
+    mark.innerHTML = `<span>${COPYRIGHT_OWNER}</span><span>项目资料 · 未经授权禁止复制传播</span>`;
     document.body.appendChild(mark);
 
     const notice = () => toast("已启用版权保护：禁止未授权复制、截图传播或二次商用");
@@ -55,7 +55,7 @@
         <div class="login-tabs"><button class="on">授权访问</button><button>版权声明</button></div>
         <label>项目访问码<input id="loginPass" type="password" autocomplete="current-password" placeholder="请输入项目组授权访问码"></label>
         <button id="loginEnter" class="btn btn-cyan" style="width:100%;margin-top:8px"><i class="fa fa-shield"></i> 验证并进入平台</button>
-        <div class="security-note">本平台为原创竞赛作品与项目资料展示系统，已启用访问控制、水印标记、防复制提示和接口安全策略。未经授权禁止下载、复刻、商用或二次传播。</div>
+        <div class="security-note">本平台为装配式智慧建造项目管理系统，已启用访问提示、水印标记和版权声明。涉及真实项目数据时，应通过受控后端与账号权限系统访问。</div>
       </div>`;
     document.body.appendChild(gate);
     const enter = async () => {
@@ -77,7 +77,7 @@
   function buildHeader() {
     const head = document.getElementById("ccHead");
     const navChips = MODULES.map(
-      (m) => `<a class="modchip" data-go="${m.id}"><i class="fa ${m.icon}"></i> ${m.label}</a>`
+      (m) => `<a class="modchip" href="#${m.id}" data-go="${m.id}"><i class="fa ${m.icon}"></i> ${m.label}</a>`
     ).join("");
     head.innerHTML = `
       <div class="cc-row cc-top">
@@ -96,9 +96,9 @@
         <span class="lead">数字孪生协同：装配慧检 / 超差报警 / 图纸AI核对 / 人员协同 / 一码溯源</span>
         <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <span class="cc-pill">当前模式：<b id="modeText">标准施工模式</b></span>
-          <span class="cc-pill">协同系统：<b style="color:#6ee7b7">在线</b></span>
-          <span class="cc-pill">数据接入率：<b>98.6%</b></span>
-          <span class="cc-pill">预警闭环率：<b>100%</b></span>
+          <span class="cc-pill">协同系统：<b style="color:#6ee7b7">运行正常</b></span>
+          <span class="cc-pill">数据模式：<b id="dataModeText">正在检测</b></span>
+          <span class="cc-pill">质量记录：<b id="recordCountText">--</b></span>
           <button class="cc-btn yellow" id="btnMode">模式切换</button>
           <button class="cc-btn" id="btnLow">低负载模式</button>
         </span>
@@ -106,7 +106,7 @@
       <div class="cc-green">
         <div class="cc-row">
           <span class="gbadge"><i class="fa fa-circle"></i> 运行状态：<span id="runState">标准施工模式</span></span>
-          <span class="gbadge"><i class="fa fa-database"></i> 全域数据在线</span>
+          <span class="gbadge"><i class="fa fa-database"></i> 数据来源：<span id="dataSourceText">正在检测</span></span>
           <span class="gbadge"><i class="fa fa-th"></i> 模块可点击切换</span>
           <span class="gbadge"><i class="fa fa-refresh"></i> 记录/上传/核对/溯源联动正常</span>
           <span class="gbadge"><i class="fa fa-building"></i> 项目：和美乡村3号房 1/2号剪力墙</span>
@@ -122,7 +122,7 @@
     setInterval(tick, 1000); tick();
 
     // 模式切换
-    const MODES = ["标准施工模式", "赛前冲刺模式", "日常节能模式"];
+    const MODES = ["标准施工模式", "集中作业模式", "日常节能模式"];
     let mi = 0;
     $("btnMode").addEventListener("click", () => { mi = (mi + 1) % MODES.length; $("modeText").textContent = MODES[mi]; $("runState").textContent = MODES[mi]; toast("已切换至「" + MODES[mi] + "」"); });
 
@@ -140,7 +140,8 @@
       sec.className = "view-section";
       sec.dataset.id = m.id;
       view.appendChild(sec);
-      try { m.render(sec); } catch (e) { sec.innerHTML = '<div class="card">模块加载失败：' + e.message + "</div>"; console.error(e); }
+      try { m.render(sec); } catch (e) { const card = document.createElement("div"); card.className = "card"; card.textContent = "模块加载失败：" + e.message; sec.replaceChildren(card); console.error(e); }
+      sec.querySelectorAll("a[data-go]:not([href])").forEach((a) => a.setAttribute("href", "#" + a.dataset.go));
       cache[m.id] = { sec, mod: m };
     }
     Object.values(cache).forEach((c) => { c.sec.classList.remove("active"); c.sec.style.display = "none"; });
@@ -158,10 +159,29 @@
   }
   window.AppGo = go;
 
+  async function refreshDataStatus() {
+    const online = await window.Platform.Store.backendOnline();
+    const stats = await window.Platform.Store.stats();
+    const mode = online ? "后端同步" : "本地数据";
+    const source = online ? "项目后端" : "浏览器本地样例";
+    const modeNode = $("dataModeText");
+    const sourceNode = $("dataSourceText");
+    const countNode = $("recordCountText");
+    if (modeNode) modeNode.textContent = mode;
+    if (sourceNode) sourceNode.textContent = source;
+    if (countNode) countNode.textContent = `${stats.total} 条`;
+  }
+
   // 委托点击
   document.addEventListener("click", (e) => {
     const a = e.target.closest("[data-go]");
     if (a) { e.preventDefault(); go(a.dataset.go); }
+  });
+  document.addEventListener("keydown", (e) => {
+    const target = e.target.closest("[data-go]");
+    if (!target || !["Enter", " "].includes(e.key)) return;
+    e.preventDefault();
+    go(target.dataset.go);
   });
   window.addEventListener("hashchange", () => {
     const id = location.hash.replace("#", "").split("?")[0];
@@ -172,6 +192,6 @@
     buildHeader();
   buildLoginGate();
   const initial = location.hash.replace("#", "").split("?")[0] || (MODULES[0] && MODULES[0].id);
-  // 先确保演示数据就绪，再渲染首屏
-  Promise.resolve(window.Platform.Store.seedIfEmpty()).finally(() => go(initial));
+  // 先确保初始数据就绪，再渲染首屏并标明真实数据来源。
+  Promise.resolve(window.Platform.Store.seedIfEmpty()).finally(() => { go(initial); refreshDataStatus(); });
 })();

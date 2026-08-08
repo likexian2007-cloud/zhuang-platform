@@ -5,11 +5,11 @@
     el.innerHTML = `
     <div class="lane">
       <div class="card glow">
-        <div style="font-size:15px;font-weight:800;margin-bottom:6px"><i class="fa fa-bolt" style="color:var(--cyan)"></i> 演示优先通道</div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:6px"><i class="fa fa-bolt" style="color:var(--cyan)"></i> 作业协同入口</div>
         <p style="margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.7">按装配慧检、智慧工地、施工流程、AI作业票、AI闭环中心、一码溯源顺序快速切换；首页同步显示运维阶段 BHI 建筑健康指数，形成全生命周期闭环。</p>
       </div>
       <a class="card seq" data-go="huijian"><span class="no">01 装配慧检</span><h4>录入 · 图纸核对</h4><p>实测录入 → 图纸AI核对 → 超差报警。</p></a>
-      <a class="card seq" data-go="gongdi"><span class="no">02 智慧工地</span><h4>人机料法环</h4><p>人员/机械/材料/环境实时监控。</p></a>
+      <a class="card seq" data-go="gongdi"><span class="no">02 智慧工地</span><h4>人机料法环</h4><p>人员/机械/材料/环境运行监测。</p></a>
       <a class="card seq" data-go="liucheng"><span class="no">03 标准工艺</span><h4>五步定标准</h4><p>定位弹线 → 吊装固定 → 节点连接。</p></a>
       <a class="card seq" data-go="zuoyepiao"><span class="no">04 AI作业票</span><h4>准吊 · 整改闭环</h4><p>三确认一复核两到位 → AI生成作业票。</p></a>
       <a class="card seq" data-go="aiCenter"><span class="no">05 AI闭环中心</span><h4>派单 · 日志 · 评分</h4><p>整改派单 → 规范问答 → 日志热力图。</p></a>
@@ -23,7 +23,7 @@
         <p>把现场数据转成“能不能吊、哪里有风险、派给谁整改、如何复检销项”的可执行结论。</p>
       </div>
       <div class="ai-agent-grid">
-        <div><span>AI施工裁判</span><b id="aiAgentJudge">准吊</b></div>
+        <div><span>AI施工判定</span><b id="aiAgentJudge">准吊</b></div>
         <div><span>AI波形研判</span><b id="aiAgentWave">低噪声</b></div>
         <div><span>AI整改闭环</span><b>待命</b></div>
         <div><span>AI溯源助手</span><b>在线</b></div>
@@ -68,28 +68,28 @@
       <div class="float r3"><div class="t">超差报警阈值</div><div class="v">10 mm</div><div class="s">同组差值自动报警</div></div>
     </div>
 
-    <div class="demo-route">
+    <div class="workflow-route">
       <div class="route-head">
-        <div><b><i class="fa fa-map-signs"></i> 今日评委演示路线</b><p>按台词节奏自动串联：痛点说明 → 智能准入 → 试吊监测 → AI裁判 → 闭环溯源。</p></div>
-        <button id="btnDemoRoute" class="btn btn-cyan btn-sm"><i class="fa fa-play-circle"></i> 开始答辩演示</button>
+        <div><b><i class="fa fa-map-signs"></i> 今日作业闭环</b><p>按施工管理流程联动：风险识别 → 智能准入 → 试吊监测 → AI判定 → 整改溯源。</p></div>
+        <button id="btnWorkflowRoute" class="btn btn-cyan btn-sm"><i class="fa fa-play-circle"></i> 启动作业联动</button>
       </div>
       <div class="route-steps" id="routeSteps">
-        <button class="on" data-route="0">1 项目痛点</button>
+        <button class="on" data-route="0">1 风险识别</button>
         <button data-route="1">2 三确认准入</button>
         <button data-route="2">3 试吊监测</button>
-        <button data-route="3">4 AI施工裁判</button>
+        <button data-route="3">4 AI施工判定</button>
         <button data-route="4">5 整改溯源</button>
       </div>
-      <div id="routeNarration" class="route-narration">当前讲解：装配式乡村住宅施工需要解决协同难、数据慢、定位偏差和质量追溯弱的问题。</div>
+      <div id="routeNarration" class="route-narration">当前环节：识别协同、数据时效、定位偏差和质量追溯风险。</div>
     </div>
 
     <div class="cols3 dashboard-innovations">
       <div class="card judge-card">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-          <div style="font-size:16px;font-weight:800">AI施工裁判系统</div>
+          <div style="font-size:16px;font-weight:800">AI施工判定系统</div>
           <span id="judgeBadge" class="badge green">准予吊装</span>
         </div>
-        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">把台词里的施工标准转成自动判定：风速、试吊、钢筋、凿毛、安全距离、人员到位同步过审。</p>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">将施工规范与现场控制指标转化为自动判定规则：风速、试吊、钢筋、凿毛、安全距离、人员到位同步核验。</p>
         <div class="judge-grid">
           <div><span>试吊高度</span><b id="judgeLift">300 mm</b><em>停顿 3s</em></div>
           <div><span>风速</span><b id="judgeWind">0.4 m/s</b><em><6 m/s</em></div>
@@ -116,12 +116,12 @@
       </div>
       <div class="card ai-brief-card">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-          <div style="font-size:16px;font-weight:800">AI总控大脑 · 答辩摘要</div>
-          <span id="briefBadge" class="badge cyan">可生成</span>
+          <div style="font-size:16px;font-weight:800">AI总控大脑 · 项目状态摘要</div>
+          <span id="briefBadge" class="badge cyan">待更新</span>
         </div>
-        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">一键把当前平台状态整理成评委能听懂的“创新闭环说明”。</p>
-        <div id="aiBrief" class="ai-report compact">等待生成：将汇总 BHI、LSI、AI裁判、智能闸机、二维码溯源与低碳价值。</div>
-        <button id="btnAiBrief" class="btn btn-cyan btn-sm" style="margin-top:10px"><i class="fa fa-magic"></i> 生成答辩摘要</button>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">汇总当前健康指标、吊装稳定性、准入判定和整改溯源状态，形成项目管理简报。</p>
+        <div id="aiBrief" class="ai-report compact">尚未更新：将汇总 BHI、LSI、AI施工判定、智能闸机、二维码溯源与低碳指标。</div>
+        <button id="btnAiBrief" class="btn btn-cyan btn-sm" style="margin-top:10px"><i class="fa fa-magic"></i> 更新项目简报</button>
       </div>
     </div>
 
@@ -129,8 +129,8 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
           <div><div style="font-size:16px;font-weight:800">智慧运维 · AI健康监测</div>
-          <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim)">关键部位布设振动、裂缝、倾角、位移及温湿度传感器，实时上传至智慧运维平台，异常自动识别、风险预警、健康评估。</p></div>
-          <span class="badge green">BHI在线</span>
+          <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim)">支持接入振动、裂缝、倾角、位移及温湿度传感器，统一完成异常识别、风险预警和健康评估；当前未连接真实设备。</p></div>
+          <span class="badge amber">BHI计算启用</span>
         </div>
         <div class="life-chain" style="margin-top:12px">
           <div class="node"><b>设计</b><p>BIM构件编码、传感器预留点位</p></div>
@@ -143,8 +143,8 @@
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
           <div style="font-size:16px;font-weight:800">AI 运维总工 · 健康评估</div><span id="bhiAiBadge" class="badge amber">AI检测中</span>
         </div>
-        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">读取 BHI 传感器实时数据，调用 DeepSeek 生成风险原因、运维处置、复核频率和闭环建议。</p>
-        <div id="bhiAiReport" class="ai-report">等待 AI 健康评估。当前 BHI 数据会实时刷新，点击下方按钮生成专业运维建议。</div>
+        <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">读取当前 BHI 指标快照，生成风险原因、运维处置、复核频率和闭环建议；接入设备后可使用现场采集值。</p>
+        <div id="bhiAiReport" class="ai-report">等待 AI 健康评估。当前指标按本地样例刷新，点击下方按钮生成运维建议。</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
           <button id="btnBhiAI" class="btn btn-cyan btn-sm"><i class="fa fa-magic"></i> AI健康评估</button>
           <button id="btnBhiLocal" class="btn btn-ghost btn-sm"><i class="fa fa-heartbeat"></i> 本地规则复核</button>
@@ -180,7 +180,7 @@
         <div style="display:flex;justify-content:space-between"><div style="font-size:16px;font-weight:800">平台核心能力</div><span class="badge cyan">数字提效</span></div>
         <p style="margin:6px 0 12px;font-size:12.5px;color:var(--text-dim)">规范筑基 · 数字提效。</p>
         <div class="cap">
-          <div class="c"><div class="t">质量管控</div><div class="big">数字化</div><div class="s">实时采集·智能比对·超差报警</div></div>
+          <div class="c"><div class="t">质量管控</div><div class="big">数字化</div><div class="s">过程采集·智能比对·超差报警</div></div>
           <div class="c"><div class="t">图纸核对</div><div class="big">AI化</div><div class="s">实测对图纸·自动判定偏差</div></div>
           <div class="c"><div class="t">工艺流程</div><div class="big">精益化</div><div class="s">缩模验工艺·五步定标准</div></div>
           <div class="c"><div class="t">建造模式</div><div class="big">可复制</div><div class="s">低碳高效·乡村适配</div></div>
@@ -203,7 +203,7 @@
             </div>
             <div class="lsi-strip">
               <div><span>LSI吊装稳定性指数</span><b id="lsiScore">96.8</b><em>分</em></div>
-              <div><span>数据来源</span><b id="sensorMode">演示数据</b><em>接口待接入</em></div>
+              <div><span>数据来源</span><b id="sensorMode">本地样例</b><em>设备未连接</em></div>
               <div><span>AI波形结论</span><b id="waveLabel">低噪声稳定</b><em>自动研判</em></div>
             </div>
             <div class="vib-canvas-wrap">
@@ -218,7 +218,7 @@
             </div>
             <div class="vib-actions">
               <button id="btnVibHit" class="btn btn-cyan btn-sm"><i class="fa fa-folder-open-o"></i> 载入试吊冲击样本</button>
-              <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 连续采样演示</button>
+              <button id="btnVibAuto" class="btn btn-ghost btn-sm on"><i class="fa fa-play"></i> 连续样例采样</button>
               <button id="btnWaveAI" class="btn btn-ghost btn-sm"><i class="fa fa-magic"></i> AI研判波形</button>
             </div>
             <div id="waveReport" class="wave-report">正常微振：曲线幅值低、无持续上升趋势，符合试吊前稳定状态。</div>
@@ -350,7 +350,7 @@
           if (zNode) zNode.textContent = z.toFixed(3);
           if (peakNode) peakNode.textContent = eventPeak.toFixed(3);
           if (lsiNode) lsiNode.textContent = lsi.toFixed(1);
-          if (modeNode) modeNode.textContent = eventPeak >= 0.5 ? "历史冲击样本" : "演示数据";
+          if (modeNode) modeNode.textContent = eventPeak >= 0.5 ? "历史冲击样本" : "本地样例";
           if (labelNode) labelNode.textContent = waveText;
           if (aiAgentWave) aiAgentWave.textContent = eventPeak >= 0.5 ? "冲击预警" : eventPeak >= 0.28 ? "试吊扰动" : "低噪声";
           if (status) {
@@ -430,7 +430,7 @@
       if (autoBtn) autoBtn.addEventListener("click", () => {
         state.auto = !state.auto;
         autoBtn.classList.toggle("on", state.auto);
-        autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 连续采样演示' : '<i class="fa fa-pause"></i> 曲线已暂停';
+        autoBtn.innerHTML = state.auto ? '<i class="fa fa-play"></i> 连续样例采样' : '<i class="fa fa-pause"></i> 曲线已暂停';
       });
       if (aiBtn) aiBtn.addEventListener("click", () => {
         const d = this._vibSnapshot || { peak: 0.08, lsi: 96.8, waveText: "低噪声稳定" };
@@ -445,11 +445,11 @@
     };
     initVibrationCurve();
     const routeTexts = [
-      "当前讲解：装配式乡村住宅施工需要解决协同难、数据慢、定位偏差和质量追溯弱的问题。",
-      "当前讲解：三确认、一复核、两到位全部通过后，智能闸机才允许进入吊装作业。",
-      "当前讲解：300mm试吊停顿3秒，同时读取三轴加速度曲线和LSI吊装稳定性指数。",
-      "当前讲解：AI施工裁判把风速、试吊、凿毛、钢筋外露、安全距离转成可解释判定。",
-      "当前讲解：异常会进入AI闭环中心形成整改工单，并通过一码溯源绑定到构件数字身份证。",
+      "当前环节：识别协同、数据时效、定位偏差和质量追溯风险。",
+      "当前环节：三确认、一复核、两到位全部通过后，智能闸机才允许进入吊装作业。",
+      "当前环节：300mm试吊停顿3秒，同时读取三轴加速度曲线和LSI吊装稳定性指数。",
+      "当前环节：AI施工判定将风速、试吊、凿毛、钢筋外露和安全距离转成可解释结论。",
+      "当前环节：异常进入AI闭环中心形成整改工单，并通过一码溯源绑定到构件数字身份证。",
     ];
     const activateRoute = (idx) => {
       el.querySelectorAll("[data-route]").forEach((b) => b.classList.toggle("on", Number(b.dataset.route) === idx));
@@ -458,8 +458,8 @@
     };
     if (!this._innovationReady) {
       el.querySelectorAll("[data-route]").forEach((btn) => btn.addEventListener("click", () => activateRoute(Number(btn.dataset.route))));
-      const demoBtn = el.querySelector("#btnDemoRoute");
-      if (demoBtn) demoBtn.addEventListener("click", () => {
+      const workflowBtn = el.querySelector("#btnWorkflowRoute");
+      if (workflowBtn) workflowBtn.addEventListener("click", () => {
         let i = 0;
         clearInterval(this._routePlay);
         activateRoute(0);
@@ -491,14 +491,14 @@
         const badge = el.querySelector("#briefBadge");
         const snap = this._bhiSnapshot || { score: "98.6", state: "安全运行" };
         const vib = this._vibSnapshot || { peak: 0.08, lsi: 96.8, waveText: "低噪声稳定" };
-        if (out) { out.classList.add("loading"); out.textContent = "AI总控正在生成答辩摘要..."; }
+        if (out) { out.classList.add("loading"); out.textContent = "AI总控正在更新项目简报..."; }
         if (badge) { badge.className = "badge amber"; badge.textContent = "生成中"; }
-        const local = `【答辩摘要】平台围绕“规范筑基、数字提效”形成施工前智能准入、施工中AI裁判、施工后整改溯源、运维期BHI健康监测闭环。当前BHI ${snap.score}分，${snap.state}；LSI ${vib.lsi.toFixed ? vib.lsi.toFixed(1) : vib.lsi}分，波形判定为${vib.waveText}。创新点包括三确认一复核两到位智能闸机、图纸AI核对、吊装稳定性指数、一码一构件全生命周期档案。`;
+        const local = `【项目状态简报】平台已形成施工前智能准入、施工中AI判定、施工后整改溯源、运维期BHI健康监测闭环。当前BHI ${snap.score}分，${snap.state}；LSI ${vib.lsi.toFixed ? vib.lsi.toFixed(1) : vib.lsi}分，波形判定为${vib.waveText}。当前管理能力包括三确认一复核两到位智能闸机、图纸AI核对、吊装稳定性指数和一码一构件全生命周期档案。`;
         try {
           if (!(await AI.available())) throw new Error("AI 后端暂不可用");
           const reply = await AI.chat([
-            { role: "system", content: "你是装配式施工大赛答辩总控，请把平台能力总结成180字内评委能听懂的创新亮点，语言要专业、有冲击力。" },
-            { role: "user", content: JSON.stringify({ BHI: snap, vibration: vib, gate: "三确认一复核两到位", judge: "AI施工裁判", trace: "一码溯源" }, null, 2) },
+            { role: "system", content: "你是装配式施工项目总控助手，请将当前指标与管理状态整理成180字以内的项目简报，语言专业、客观，明确风险与下一步措施。" },
+            { role: "user", content: JSON.stringify({ BHI: snap, vibration: vib, gate: "三确认一复核两到位", decision: "AI施工判定", trace: "一码溯源" }, null, 2) },
           ], { max_tokens: 460, temperature: 0.35 });
           if (out) out.textContent = reply || local;
         } catch (e) {

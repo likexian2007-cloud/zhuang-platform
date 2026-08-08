@@ -174,7 +174,7 @@
   onShow() { /* 看板在切换到 quality 标签时刷新 */ },
 
   setup(root) {
-    const { $, fmt, now, toast, Store, startSiren, stopSiren, AI } = window.Platform;
+    const { $, fmt, now, toast, escapeHtml, Store, startSiren, stopSiren, AI } = window.Platform;
     const STEPS_PER_WALL = [
       { id: "size", name: "墙体尺寸检查完成后" }, { id: "line", name: "定位弹线完成后" },
       { id: "fix", name: "固定安装完成后" }, { id: "rebar", name: "钢筋绑扎完成后" },
@@ -466,19 +466,19 @@
       ].filter(Boolean).join(" · ");
       $(`dwgBadge${wall}`).className = "badge green";
       $(`dwgBadge${wall}`).textContent = "已抽取";
-      $(`dwgInfo${wall}`).innerHTML = `${sourceLabel || "AI"} 已抽取设计值：${bits || "未识别到有效参数"}。${p.sourceSummary ? `<br><span class="mute2">${p.sourceSummary}</span>` : ""}`;
+      $(`dwgInfo${wall}`).innerHTML = `${escapeHtml(sourceLabel || "AI")} 已抽取设计值：${escapeHtml(bits || "未识别到有效参数")}。${p.sourceSummary ? `<br><span class="mute2">${escapeHtml(p.sourceSummary)}</span>` : ""}`;
     }
     function applyPreset(wall) {
       const dn = $(`drawingNo${wall}`).value; const p = PRESET[dn] || PRESET._default;
-      applyDrawingParams(wall, Object.assign({ drawingNo: dn }, p, { sourceSummary: "来自内置图集预设，适合演示；正式核对应优先使用 OCR/AI 抽取。" }), "图集预设");
+      applyDrawingParams(wall, Object.assign({ drawingNo: dn }, p, { sourceSummary: "来自内置图集参考值；正式核对应以经审核的项目图纸或 OCR/AI 抽取结果为准。" }), "图集参考值");
     }
     async function runDrawingOcr(wall) {
       const file = drawingFiles[wall];
       if (!file) { alert("请先上传清晰的图纸图片"); return; }
-      if (!window.Tesseract) { alert("OCR 组件未加载，请检查网络后重试"); return; }
       $(`dwgBadge${wall}`).className = "badge cyan"; $(`dwgBadge${wall}`).textContent = "OCR中…";
       $(`dwgInfo${wall}`).textContent = "正在识别图纸图片文字，清晰图片通常需要 10-30 秒……";
       try {
+        await window.Platform.ensureVendor("tesseract");
         const result = await Tesseract.recognize(file, "chi_sim+eng");
         const text = (result.data && result.data.text || "").trim();
         $(`dwgText${wall}`).value = text;
@@ -621,7 +621,7 @@
       const firstCid = cids[0] || "";
       return `${base}?cid=${encodeURIComponent(firstCid)}&rid=${encodeURIComponent(lastSavedRecordId || "draft")}&p=${Math.round((done / total) * 100)}&a=${evaluateAI()}#trace`;
     }
-    $("btnGenQR").addEventListener("click", () => { const box = $("qrcode"); box.innerHTML = ""; const text = buildInfoQRText(); $("qrLink").value = text; try { new QRCode(box, { text, width: 200, height: 200, colorDark: "#00e5ff", colorLight: "#0b1220", correctLevel: QRCode.CorrectLevel.L }); } catch (e) { box.innerHTML = '<div style="color:#f87171">二维码生成失败：内容过长</div>'; } });
+    $("btnGenQR").addEventListener("click", async () => { const box = $("qrcode"); box.textContent = "正在加载二维码组件…"; const text = buildInfoQRText(); $("qrLink").value = text; try { await window.Platform.ensureVendor("qrcode"); box.innerHTML = ""; new QRCode(box, { text, width: 200, height: 200, colorDark: "#00e5ff", colorLight: "#0b1220", correctLevel: QRCode.CorrectLevel.L }); } catch (e) { box.textContent = "二维码生成失败：" + e.message; } });
     $("btnDLQR").addEventListener("click", () => { const canvas = root.querySelector("#qrcode canvas"); if (!canvas) { alert("请先生成二维码"); return; } const a = document.createElement("a"); a.href = canvas.toDataURL("image/jpeg", 0.95); a.download = "双墙体吊装记录二维码.jpg"; a.click(); });
 
     /* 签名 */
@@ -661,10 +661,10 @@
         WALLS.forEach((wall) => { const total = parseInt($(`sleeveTotal${wall}`).value || 0), failed = parseInt($(`sleeveFailed${wall}`).value || 0); if (total > 0 && failed > 0) passRate -= Math.min(15, Math.round((failed / total) * 15)); STEPS_PER_WALL.forEach((s) => { if (!d.walls[wall].steps[s.id].done) passRate -= 3; if (d.walls[wall].steps[s.id].pass === false) passRate -= 5; }); });
         passRate -= d.inspection.abnormalCount * 8;
         d.passRate = Math.max(0, Math.min(100, Math.round(passRate))); d.status = d.passRate >= 90 ? "合格" : d.passRate >= 70 ? "预警" : "不合格"; d.uploadTime = d.meta.uploadTime;
-        const saved = await Store.add(d); lastSavedRecordId = saved.id || d.id; $("qmUpdate").textContent = now(); toast("已上传至质量监测系统 · 合格率 " + d.passRate + "%");
+        const saved = await Store.add(d); lastSavedRecordId = saved.id || d.id; $("qmUpdate").textContent = now(); toast("已保存至质量监测系统 · 合格率 " + d.passRate + "%");
       } catch (e) { alert(e.message); }
     });
-    $("exportPdf").addEventListener("click", () => { const { jsPDF } = window.jspdf; const doc = new jsPDF("l", "mm", "a4"); html2canvas($("recordForm"), { scale: 2, useCORS: true, backgroundColor: "#0b1220" }).then((canvas) => { const img = canvas.toDataURL("image/jpeg", 0.9); const imgWidth = 280, imgHeight = (canvas.height * imgWidth) / canvas.width; doc.addImage(img, "JPEG", 10, 10, imgWidth, imgHeight); if (imgHeight > 270) { doc.addPage(); doc.addImage(img, "JPEG", 10, 10 - imgHeight + 270, imgWidth, imgHeight); } doc.save(`${$("teamId1").value || "未知队伍"}-双墙体吊装记录表.pdf`); }); });
+    $("exportPdf").addEventListener("click", async () => { try { toast("正在加载 PDF 导出组件…"); await window.Platform.ensureVendors(["jspdf", "html2canvas"]); const { jsPDF } = window.jspdf; const doc = new jsPDF("l", "mm", "a4"); const canvas = await html2canvas($("recordForm"), { scale: 2, useCORS: true, backgroundColor: "#0b1220" }); const img = canvas.toDataURL("image/jpeg", 0.9); const imgWidth = 280, imgHeight = (canvas.height * imgWidth) / canvas.width; doc.addImage(img, "JPEG", 10, 10, imgWidth, imgHeight); if (imgHeight > 270) { doc.addPage(); doc.addImage(img, "JPEG", 10, 10 - imgHeight + 270, imgWidth, imgHeight); } doc.save(`${$("teamId1").value || "未知队伍"}-双墙体吊装记录表.pdf`); } catch (e) { alert("PDF 导出失败：" + e.message); } });
     $("exportJson").addEventListener("click", () => {
       try {
         const d = collectFormData();
@@ -690,9 +690,10 @@
     async function renderQuality() {
       $("qmTime").textContent = now();
       const { total, qualified, warning, unqualified, list } = await Store.stats();
+      try { await window.Platform.ensureVendor("chart"); } catch (e) { toast(e.message); return; }
       $("qmCards").innerHTML = [{ label: "总记录", val: total, color: "#9fe9ff" }, { label: "合格", val: qualified, color: "#6ee7b7" }, { label: "预警", val: warning, color: "#fcd34d" }, { label: "不合格", val: unqualified, color: "#fca5a5" }].map((x) => `<div class="kpi"><div class="lbl">${x.label}</div><div class="val" style="background:none;color:${x.color}">${x.val}</div></div>`).join("");
       const tbody = $("qmList"); tbody.innerHTML = "";
-      list.slice(-14).reverse().forEach((r) => { const total2 = WALLS.length * STEPS_PER_WALL.length; let done = 0; WALLS.forEach((w) => { const st = r.walls && r.walls[w] && r.walls[w].steps; if (st) Object.values(st).forEach((s) => { if (s.done) done++; }); }); const pct = Math.round((done / total2) * 100); const stCls = r.status === "合格" ? "green" : r.status === "预警" ? "amber" : "red"; const tr = document.createElement("tr"); tr.innerHTML = `<td>${r.id}</td><td>${(r.walls?.[1]?.cid)||"-"} / ${(r.walls?.[2]?.cid)||"-"}</td><td>${r.walls?.[1]?.componentType||"-"}</td><td>${r.walls?.[1]?.matchSession||"-"}</td><td class="mute2">${r.uploadTime||r.meta?.uploadTime||"-"}</td><td><b style="color:#9fe9ff">${r.passRate??"-"}</b></td><td>${pct}%</td><td><span class="badge ${stCls}">${r.status||"-"}</span></td><td><button class="btn btn-sm btn-ghost qmDel" data-id="${r.id}">删除</button></td>`; tbody.appendChild(tr); });
+      list.slice(-14).reverse().forEach((r) => { const total2 = WALLS.length * STEPS_PER_WALL.length; let done = 0; WALLS.forEach((w) => { const st = r.walls && r.walls[w] && r.walls[w].steps; if (st) Object.values(st).forEach((s) => { if (s.done) done++; }); }); const pct = Math.round((done / total2) * 100); const stCls = r.status === "合格" ? "green" : r.status === "预警" ? "amber" : "red"; const tr = document.createElement("tr"); tr.innerHTML = `<td>${escapeHtml(r.id)}</td><td>${escapeHtml(r.walls?.[1]?.cid||"-")} / ${escapeHtml(r.walls?.[2]?.cid||"-")}</td><td>${escapeHtml(r.walls?.[1]?.componentType||"-")}</td><td>${escapeHtml(r.walls?.[1]?.matchSession||"-")}</td><td class="mute2">${escapeHtml(r.uploadTime||r.meta?.uploadTime||"-")}</td><td><b style="color:#9fe9ff">${escapeHtml(r.passRate??"-")}</b></td><td>${pct}%</td><td><span class="badge ${stCls}">${escapeHtml(r.status||"-")}</span></td><td><button class="btn btn-sm btn-ghost qmDel" data-id="${escapeHtml(r.id)}">删除</button></td>`; tbody.appendChild(tr); });
       const ctx1 = $("qualityTrend").getContext("2d"), ctx2 = $("qualityDist").getContext("2d");
       if (chartTrend) chartTrend.destroy(); if (chartDist) chartDist.destroy();
       Chart.defaults.color = "#94a3b8"; Chart.defaults.borderColor = "rgba(148,163,184,.12)";
